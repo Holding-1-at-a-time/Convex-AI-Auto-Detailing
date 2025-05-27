@@ -10,7 +10,7 @@ export function SiteLayout({ children }: SiteLayoutProps) {
     <div className="flex flex-col min-h-screen">
       <header className="border-b">
         <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+          <Link href="/home" className="flex items-center gap-2 font-semibold">
             <span className="text-xl font-bold">AutoDetailAI</span>
           </Link>
           <nav className="ml-auto flex gap-4 sm:gap-6">

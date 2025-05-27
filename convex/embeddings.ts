@@ -1,16 +1,20 @@
 import { v } from "convex/values"
 import { action, mutation, query } from "./_generated/server"
-import { openai } from "@ai-sdk/openai"
+import { ollama } from "ollama-ai-provider"
+import { embed } from "ai"
 import { internal } from "./_generated/api"
+import { getCurrentTimestamp } from "./utils"
 
-// Generate an embedding for text using OpenAI
+// Generate an embedding for text using Ollama
 async function generateEmbedding(text: string): Promise<number[]> {
-  const embeddingResponse = await openai.embedding({
-    model: "text-embedding-3-small",
-    input: text,
+  const embeddingModel = ollama.embedding("granite-embedding:278m")
+
+  const { embedding } = await embed({
+    model: embeddingModel,
+    value: text,
   })
 
-  return embeddingResponse.data[0].embedding
+  return embedding
 }
 
 // Store a knowledge base item with its embedding
@@ -39,11 +43,55 @@ export const storeKnowledgeItem = mutation({
       category: args.category,
       tags: args.tags,
       embeddingId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: getCurrentTimestamp(),
+      updatedAt: getCurrentTimestamp(),
     })
 
     return { knowledgeId, embeddingId }
+  },
+})
+
+// Store a product embedding
+export const storeProductEmbedding = mutation({
+  args: {
+    productId: v.id("products"),
+    name: v.string(),
+    description: v.string(),
+    category: v.string(),
+    recommendedFor: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Generate embedding for the product
+    const embedding = await generateEmbedding(
+      `${args.name} ${args.description} ${args.category} ${args.recommendedFor.join(" ")}`,
+    )
+
+    // Check if an embedding already exists for this product
+    const existingEmbedding = await ctx.db
+      .query("productEmbeddings")
+      .filter((q) => q.eq(q.field("productId"), args.productId))
+      .first()
+
+    if (existingEmbedding) {
+      // Update existing embedding
+      await ctx.db.patch(existingEmbedding._id, {
+        embedding,
+        category: args.category,
+        vehicleTypes: args.recommendedFor,
+      })
+
+      return { embeddingId: existingEmbedding._id }
+    } else {
+      // Store new embedding
+      const embeddingId = await ctx.db.insert("productEmbeddings", {
+        embedding,
+        productId: args.productId,
+        category: args.category,
+        vehicleTypes: args.recommendedFor,
+      })
+
+      return { embeddingId }
+    }
   },
 })
 
@@ -80,7 +128,7 @@ export const storeVehicleRecommendation = mutation({
       yearRange: args.yearRange,
       priority: args.priority,
       embeddingId,
-      createdAt: new Date().toISOString(),
+      createdAt: getCurrentTimestamp(),
     })
 
     return { recommendationId, embeddingId }
@@ -111,7 +159,7 @@ export const storeUserQuery = mutation({
       threadId: args.threadId,
       query: args.query,
       embeddingId,
-      timestamp: new Date().toISOString(),
+      timestamp: getCurrentTimestamp(),
     })
 
     return { queryId, embeddingId }
@@ -188,6 +236,59 @@ export const fetchKnowledgeItems = query({
       }
     }
     return items
+  },
+})
+
+// Search products using vector search
+export const searchProductsWithEmbedding = action({
+  args: {
+    query: v.string(),
+    category: v.optional(v.string()),
+    vehicleType: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Generate embedding for the query
+    const embedding = await generateEmbedding(args.query)
+
+    // Build the filter based on provided args
+    let filter: any = undefined
+    if (args.category && args.vehicleType) {
+      // Filter by both category and vehicle type
+      filter = (q: any) => {
+        return q.and(q.eq("category", args.category!), q.includes(q.field("vehicleTypes"), args.vehicleType!))
+      }
+    } else if (args.category) {
+      // Filter by category only
+      filter = (q: any) => q.eq("category", args.category!)
+    } else if (args.vehicleType) {
+      // Filter by vehicle type only
+      filter = (q: any) => q.includes(q.field("vehicleTypes"), args.vehicleType!)
+    }
+
+    // Perform vector search
+    const results = await ctx.vectorSearch("productEmbeddings", "by_embedding", {
+      vector: embedding,
+      limit: args.limit || 5,
+      filter,
+    })
+
+    // Fetch the products
+    const products = []
+    for (const result of results) {
+      const embedding = await ctx.db.get(result._id)
+      if (embedding) {
+        const product = await ctx.db.get(embedding.productId)
+        if (product) {
+          products.push({
+            ...product,
+            relevanceScore: result._score,
+          })
+        }
+      }
+    }
+
+    return products
   },
 })
 
@@ -346,8 +447,8 @@ export const batchImportKnowledge = mutation({
         category: item.category,
         tags: item.tags,
         embeddingId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: getCurrentTimestamp(),
+        updatedAt: getCurrentTimestamp(),
       })
 
       results.push({ knowledgeId, embeddingId })
