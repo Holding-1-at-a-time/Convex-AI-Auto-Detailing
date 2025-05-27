@@ -3,6 +3,7 @@ import { action, mutation, query } from "./_generated/server"
 import { Agent, createTool } from "@convex-dev/agent"
 import { openai } from "@ai-sdk/openai"
 import { components } from "./_generated/api"
+import { internal } from "./_generated/api"
 import { z } from "zod"
 
 // Create the auto detailing agent
@@ -22,17 +23,50 @@ const autoDetailingAgent = new Agent(components.agent, {
     explain why they're suitable for the specific situation.
   `,
   tools: {
-    // Tool to look up vehicle-specific detailing recommendations
+    // Tool to look up vehicle-specific detailing recommendations using vector search
     vehicleRecommendations: createTool({
       description: "Get detailing recommendations for a specific vehicle make, model, and year",
       args: z.object({
         make: z.string().describe("The make of the vehicle"),
         model: z.string().describe("The model of the vehicle"),
         year: z.number().describe("The year of the vehicle"),
+        query: z.optional(z.string()).describe("Optional specific query about the vehicle"),
       }),
       handler: async (ctx, args): Promise<{ recommendations: string[] }> => {
-        // In a real implementation, this would query a database of vehicle-specific recommendations
-        // For now, we'll return some generic recommendations
+        // Use vector search to find relevant recommendations
+        const searchQuery = args.query || `${args.year} ${args.make} ${args.model} detailing recommendations`
+
+        const recommendations = await ctx.runAction(internal.embeddings.searchVehicleRecommendations, {
+          query: searchQuery,
+          make: args.make,
+          model: args.model,
+          year: args.year,
+          limit: 5,
+        })
+
+        // If we have specific recommendations for this vehicle, use them
+        if (recommendations && recommendations.length > 0) {
+          return {
+            recommendations: recommendations.map(
+              (rec) => `${rec.title}: ${rec.description} (Priority: ${rec.priority})`,
+            ),
+          }
+        }
+
+        // Fallback to knowledge base search
+        const knowledgeResults = await ctx.runAction(internal.embeddings.searchKnowledgeBase, {
+          query: searchQuery,
+          category: "vehicle_specific",
+          limit: 5,
+        })
+
+        if (knowledgeResults && knowledgeResults.length > 0) {
+          return {
+            recommendations: knowledgeResults.map((item) => `${item.title}: ${item.content}`),
+          }
+        }
+
+        // Fallback to generic recommendations
         return {
           recommendations: [
             `For ${args.year} ${args.make} ${args.model}: Use pH-neutral soap for the paint`,
@@ -50,6 +84,7 @@ const autoDetailingAgent = new Agent(components.agent, {
         lastDetailingDate: z.string().describe("The date of the last detailing"),
         currentIssues: z.array(z.string()).describe("Current issues with the vehicle"),
         mileage: z.number().optional().describe("Current mileage of the vehicle"),
+        vehicleId: z.string().optional().describe("ID of the vehicle in the database"),
       }),
       handler: async (ctx, args): Promise<{ score: number; analysis: string }> => {
         // Calculate days since last detailing
@@ -59,25 +94,25 @@ const autoDetailingAgent = new Agent(components.agent, {
           (currentDate.getTime() - lastDetailingDate.getTime()) / (1000 * 60 * 60 * 24),
         )
 
-        // Calculate condition score (simple algorithm for demo)
-        let score = 100
-
-        // Reduce score based on days since last detailing
-        if (daysSinceLastDetailing > 90) {
-          score -= 20
-        } else if (daysSinceLastDetailing > 30) {
-          score -= 10
+        // Get historical condition data if vehicleId is provided
+        let historicalData = null
+        if (args.vehicleId) {
+          historicalData = await ctx.runQuery(internal.analytics.getVehicleConditionHistory, {
+            vehicleId: args.vehicleId,
+          })
         }
 
-        // Reduce score based on number of issues
-        score -= args.currentIssues.length * 5
-
-        // Ensure score is between 0 and 100
-        score = Math.max(0, Math.min(100, score))
+        // Use our predictive model to calculate the condition score
+        const predictedScore = await ctx.runAction(internal.ml.predictConditionScore, {
+          daysSinceLastDetailing,
+          issuesCount: args.currentIssues.length,
+          mileage: args.mileage,
+          historicalData,
+        })
 
         return {
-          score,
-          analysis: `Your vehicle was last detailed ${daysSinceLastDetailing} days ago and has ${args.currentIssues.length} reported issues. Based on this data, your vehicle's condition score is ${score}/100.`,
+          score: predictedScore.score,
+          analysis: predictedScore.analysis,
         }
       },
     }),
@@ -92,27 +127,106 @@ const autoDetailingAgent = new Agent(components.agent, {
         timeAvailable: z.number().describe("Time available for detailing in hours"),
       }),
       handler: async (ctx, args): Promise<{ plan: string[] }> => {
-        // In a real implementation, this would use ML to generate a personalized plan
-        // For now, we'll return a simple plan based on the inputs
+        // Search knowledge base for relevant detailing steps
+        const searchQuery = `${args.vehicleType} ${args.currentCondition} detailing plan`
 
-        const plan = [
-          `Step 1: Initial rinse (15 minutes)`,
-          `Step 2: Apply soap and wash exterior (30 minutes)`,
-          `Step 3: Clean wheels and tires (20 minutes)`,
-          `Step 4: Rinse and dry exterior (20 minutes)`,
-          `Step 5: Clean interior surfaces (45 minutes)`,
-          `Step 6: Vacuum interior (20 minutes)`,
-          `Step 7: Apply protectants to surfaces (30 minutes)`,
-        ]
+        const knowledgeResults = await ctx.runAction(internal.embeddings.searchKnowledgeBase, {
+          query: searchQuery,
+          category: "detailing_plan",
+          tags: args.userPreferences,
+          limit: 10,
+        })
 
-        // Adjust plan based on time available
-        if (args.timeAvailable < 3) {
-          return {
-            plan: plan.slice(0, 4),
-          }
+        // If we have relevant knowledge, use it to enhance the plan
+        if (knowledgeResults && knowledgeResults.length > 0) {
+          // Extract steps from knowledge base results
+          const knowledgeSteps = knowledgeResults
+            .flatMap((item) => item.content.split("\n"))
+            .filter((step) => step.trim().length > 0)
+            .slice(0, 10)
+
+          // Generate a plan using the knowledge base steps
+          const plan = await ctx.runAction(internal.recommendations.generateDetailingPlan, {
+            vehicleType: args.vehicleType,
+            currentCondition: args.currentCondition,
+            userPreferences: args.userPreferences,
+            timeAvailable: args.timeAvailable,
+            additionalSteps: knowledgeSteps,
+          })
+
+          return { plan: plan.steps }
         }
 
-        return { plan }
+        // Fallback to standard plan generation
+        const plan = await ctx.runAction(internal.recommendations.generateDetailingPlan, {
+          vehicleType: args.vehicleType,
+          currentCondition: args.currentCondition,
+          userPreferences: args.userPreferences,
+          timeAvailable: args.timeAvailable,
+        })
+
+        return { plan: plan.steps }
+      },
+    }),
+
+    // Tool to search knowledge base
+    searchKnowledgeBase: createTool({
+      description: "Search the auto detailing knowledge base",
+      args: z.object({
+        query: z.string().describe("The search query"),
+        category: z.optional(z.string()).describe("Optional category to filter by"),
+        tags: z.optional(z.array(z.string())).describe("Optional tags to filter by"),
+        limit: z.optional(z.number()).describe("Maximum number of results to return"),
+      }),
+      handler: async (
+        ctx,
+        args,
+      ): Promise<{ results: Array<{ title: string; content: string; relevanceScore: number }> }> => {
+        const searchResults = await ctx.runAction(internal.embeddings.searchKnowledgeBase, {
+          query: args.query,
+          category: args.category,
+          tags: args.tags,
+          limit: args.limit || 5,
+        })
+
+        return {
+          results: searchResults.map((result) => ({
+            title: result.title,
+            content: result.content,
+            relevanceScore: result.relevanceScore,
+          })),
+        }
+      },
+    }),
+
+    // Tool to search for auto detailing products
+    searchProducts: createTool({
+      description: "Search for auto detailing products",
+      args: z.object({
+        query: z.string().describe("Search query for products"),
+        category: z.optional(z.string()).describe("Product category filter"),
+        limit: z.optional(z.number()).describe("Maximum number of results to return"),
+      }),
+      handler: async (
+        ctx,
+        args,
+      ): Promise<{ products: Array<{ name: string; description: string; category: string }> }> => {
+        // Search knowledge base for product information
+        const searchResults = await ctx.runAction(internal.embeddings.searchKnowledgeBase, {
+          query: args.query,
+          category: "product",
+          tags: args.category ? [args.category] : undefined,
+          limit: args.limit || 5,
+        })
+
+        // Format results as products
+        const products = searchResults.map((result) => ({
+          name: result.title,
+          description: result.content,
+          category: result.tags[0] || "general",
+        }))
+
+        return { products }
       },
     }),
   },
@@ -123,10 +237,12 @@ const autoDetailingAgent = new Agent(components.agent, {
 export const createThread = mutation({
   args: {
     title: v.string(),
+    userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { threadId } = await autoDetailingAgent.createThreadMutation()(ctx, {
       title: args.title,
+      userId: args.userId,
     })
 
     return { threadId }
@@ -138,10 +254,19 @@ export const sendMessage = action({
   args: {
     threadId: v.string(),
     message: v.string(),
+    userId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Store the user query for analytics
+    await ctx.runMutation(internal.embeddings.storeUserQuery, {
+      userId: args.userId,
+      threadId: args.threadId,
+      query: args.message,
+    })
+
     const { thread } = await autoDetailingAgent.continueThread(ctx, {
       threadId: args.threadId,
+      userId: args.userId,
     })
 
     const result = await thread.generateText({
@@ -168,5 +293,60 @@ export const getThreadHistory = query({
     })
 
     return messages
+  },
+})
+
+// Save user feedback on agent responses
+export const saveUserFeedback = mutation({
+  args: {
+    userId: v.optional(v.string()),
+    threadId: v.string(),
+    messageId: v.string(),
+    rating: v.number(),
+    feedback: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Update the user query with feedback
+    const userQuery = await ctx.db
+      .query("userQueries")
+      .withIndex("by_thread", (q) => q.eq("threadId", args.threadId))
+      .order("desc")
+      .first()
+
+    if (userQuery) {
+      await ctx.db.patch(userQuery._id, {
+        responseQuality: args.rating,
+      })
+    }
+
+    // Store feedback in the agent system
+    await autoDetailingAgent.rateMutation()(ctx, {
+      messageId: args.messageId,
+      rating: args.rating,
+      feedback: args.feedback,
+    })
+
+    return { success: true }
+  },
+})
+
+// Get similar questions that users have asked
+export const getSimilarQuestions = action({
+  args: {
+    query: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const similarQueries = await ctx.runAction(internal.embeddings.findSimilarQueries, {
+      query: args.query,
+      limit: args.limit || 5,
+    })
+
+    return similarQueries
+      .filter((q) => q.relevanceScore > 0.7) // Only return highly relevant queries
+      .map((q) => ({
+        query: q.query,
+        relevanceScore: q.relevanceScore,
+      }))
   },
 })
