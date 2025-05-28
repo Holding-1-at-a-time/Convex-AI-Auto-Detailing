@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 interface UseFallbackSceneProps {
   containerRef: React.RefObject<HTMLDivElement>
@@ -12,11 +12,13 @@ interface UseFallbackSceneProps {
 }
 
 export function useFallbackScene({ containerRef, onLoaded }: UseFallbackSceneProps) {
+  const nonNullContainerRef = useRef<HTMLDivElement>(containerRef.current!);
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+
 
   const [isInitialized, setIsInitialized] = useState(false)
 

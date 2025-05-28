@@ -45,7 +45,7 @@ export default function SplashPage() {
 
   // Try to use the main scene first
   useThreeScene({
-    containerRef: containerRef.current !== null ? containerRef : { current: null },
+    containerRef: containerRef?.current,
     modelUrl: carModelUrl,
     onProgress: handleProgress,
     onLoaded: useMainScene ? handleLoaded : undefined,
