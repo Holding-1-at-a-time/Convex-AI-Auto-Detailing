@@ -1,63 +1,68 @@
-import { mutation } from "./_generated/server"
 import { v } from "convex/values"
+import { mutation, query } from "./_generated/server"
 
-// Update user profile during customer onboarding
-export const updateUserProfile = mutation({
+// Create or update a user in Convex
+export const createOrUpdateUser = mutation({
   args: {
-    userId: v.string(),
-    phone: v.optional(v.string()),
-    address: v.optional(v.string()),
-    onboardingCompleted: v.optional(v.boolean()),
+    clerkId: v.string(),
+    email: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    role: v.string(), // "customer" or "business"
   },
   handler: async (ctx, args) => {
-    const user = await ctx.db
+    // Check if user already exists
+    const existingUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("_id"), args.userId))
+      .withIndex("by_email", (q) => q.eq("email", args.email))
       .first()
 
-    if (!user) {
-      throw new Error("User not found")
-    }
+    const name = `${args.firstName || ""} ${args.lastName || ""}`.trim()
 
-    return await ctx.db.patch(user._id, {
-      phone: args.phone,
-      address: args.address,
-      onboardingCompleted: args.onboardingCompleted,
-      lastLogin: new Date().toISOString(),
-    })
+    if (existingUser) {
+      // Update existing user
+      return await ctx.db.patch(existingUser._id, {
+        name: name || existingUser.name,
+        role: args.role,
+        clerkId: args.clerkId,
+        lastLogin: new Date().toISOString(),
+      })
+    } else {
+      // Create new user
+      return await ctx.db.insert("users", {
+        name: name,
+        email: args.email,
+        role: args.role,
+        clerkId: args.clerkId,
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
+      })
+    }
   },
 })
 
-// Update business profile during business onboarding
-export const updateBusinessProfile = mutation({
-  args: {
-    userId: v.string(),
-    businessName: v.string(),
-    phone: v.optional(v.string()),
-    address: v.optional(v.string()),
-    description: v.optional(v.string()),
-    onboardingCompleted: v.optional(v.boolean()),
-  },
+// Get user by Clerk ID
+export const getUserByClerkId = query({
+  args: { clerkId: v.string() },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("_id"), args.userId))
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
       .first()
 
-    if (!user) {
-      throw new Error("User not found")
-    }
+    return user
+  },
+})
 
-    return await ctx.db.patch(user._id, {
-      name: args.businessName, // Update name to business name
-      phone: args.phone,
-      address: args.address,
-      preferences: {
-        ...(user.preferences || {}),
-        businessDescription: args.description,
-      },
-      onboardingCompleted: args.onboardingCompleted,
-      lastLogin: new Date().toISOString(),
-    })
+// Get current user role
+export const getCurrentUserRole = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), args.clerkId))
+      .first()
+
+    return user?.role || null
   },
 })

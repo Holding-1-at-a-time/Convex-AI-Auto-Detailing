@@ -1,7 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { ClerkProvider } from "@clerk/nextjs"
 import "./globals.css"
-import { Providers } from "./providers"
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body>
-        <Providers>{children}</Providers>
+        <ClerkProvider>{children}</ClerkProvider>
       </body>
     </html>
   )

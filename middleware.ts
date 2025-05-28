@@ -1,24 +1,12 @@
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs"
-import { NextResponse } from "next/server"
+import { clerkMiddleware } from "@clerk/nextjs/server"
 
-export default authMiddleware({
-  publicRoutes: ["/", "/privacy", "/terms", "/api(.*)", "/_vercel(.*)"],
-  afterAuth(auth, req) {
-    // If the user is logged in and trying to access a protected route, allow them
-    if (auth.userId && !auth.isPublicRoute) {
-      return NextResponse.next()
-    }
-
-    // If the user is not logged in and trying to access a protected route, redirect them to sign in
-    if (!auth.userId && !auth.isPublicRoute) {
-      return redirectToSignIn({ returnBackUrl: req.url })
-    }
-
-    // Allow users to access public routes
-    return NextResponse.next()
-  },
-})
+export default clerkMiddleware()
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    // Skip Next.js internals and all static files
+    "/((?!_next|[^?]*\\.(jpg|jpeg|png|gif|svg|ico|webp|js|css)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
+  ],
 }

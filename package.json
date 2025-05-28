@@ -13,7 +13,6 @@
     "@auth0/auth0-react": "latest",
     "@clerk/clerk-react": "latest",
     "@clerk/nextjs": "latest",
-    "@clerk/themes": "latest",
     "@convex-dev/agent": "latest",
     "@convex-dev/workflow": "latest",
     "@convex-dev/workpool": "latest",
