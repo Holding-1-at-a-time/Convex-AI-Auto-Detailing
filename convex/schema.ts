@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
+import { defineSchema, defineTable } from "convex/server"
 
 export default defineSchema({
   // Users table
@@ -452,4 +452,29 @@ export default defineSchema({
     createdAt: v.string(),
     updatedAt: v.optional(v.string()),
   }).index("by_customerId", ["customerId"]),
+
+  analyticsEvents: defineTable({
+    errorMessage: v.optional(v.string()),
+    eventType: v.string(),
+    feature: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    page: v.optional(v.string()),
+    timestamp: v.string(),
+    userId: v.optional(v.string()),
+  }).index("by_userId", ["userId"]),
+
+  files: defineTable({
+    contentType: v.string(),
+    description: v.optional(v.string()),
+    fileName: v.string(),
+    fileSize: v.float64(),
+    fileType: v.string(),
+    storageId: v.id("_storage"),
+    tags: v.optional(v.array(v.string())),
+    uploadedAt: v.string(),
+    userId: v.optional(v.string()),
+    vehicleId: v.optional(v.id("vehicles")),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_vehicleId", ["vehicleId"]),
 })
