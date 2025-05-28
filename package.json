@@ -46,6 +46,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@sentry/nextjs": "latest",
     "@testing-library/dom": "latest",
+    "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@types/debug": "latest",
     "@vitest/browser": "latest",
@@ -81,6 +82,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "three": "latest",
+    "util": "latest",
     "vaul": "^0.9.6",
     "vitest": "latest",
     "zod": "latest"
