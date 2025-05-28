@@ -2,46 +2,35 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useUser } from "@clerk/nextjs"
-import { useMutation, useQuery } from "convex/react"
+import { useUser, useAuth } from "@clerk/nextjs"
+import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, User } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/loading-spinner"
+import { UserCog, Users } from "lucide-react"
 
 export default function RoleSelectionPage() {
   const router = useRouter()
-  const { user } = useUser()
-  const [isLoading, setIsLoading] = useState(false)
+  const { user, isLoaded: isUserLoaded } = useUser()
+  const { isLoaded: isAuthLoaded } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const createOrUpdateUser = useMutation(api.users.createOrUpdateUser)
 
-  // Check if user already has a role
-  const existingUser = useQuery(api.users.getUserByClerkId, {
-    clerkId: user?.id || "",
-  })
+  const isLoading = !isUserLoaded || !isAuthLoaded
 
-  // If user already has a role, redirect them
-  if (existingUser?.role) {
-    if (existingUser.role === "customer") {
-      router.push("/customer/dashboard")
-    } else if (existingUser.role === "business") {
-      router.push("/business/dashboard")
-    }
-    return <LoadingSpinner />
-  }
-
-  const handleRoleSelection = async (role: "customer" | "business") => {
+  const handleRoleSelect = async (role: "customer" | "business") => {
     if (!user) return
 
-    setIsLoading(true)
+    setIsSubmitting(true)
     try {
+      // Store user data in Convex
       await createOrUpdateUser({
         clerkId: user.id,
-        email: user.emailAddresses[0]?.emailAddress || "",
+        email: user.primaryEmailAddress?.emailAddress || "",
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        role,
+        role: role,
       })
 
       // Redirect based on role
@@ -51,80 +40,60 @@ export default function RoleSelectionPage() {
         router.push("/business/dashboard")
       }
     } catch (error) {
-      console.error("Error updating user role:", error)
-      setIsLoading(false)
+      console.error("Error setting user role:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
+  if (isLoading || isSubmitting) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-4xl w-full px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to AI Auto Detailing</h1>
-          <p className="text-xl text-gray-600">Please select how you'd like to use our platform</p>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-card/50 p-4">
+      <div className="w-full max-w-4xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Welcome to AutoDetailAI</h1>
+          <p className="text-muted-foreground">Please select how you'll be using our platform</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           <Card
-            className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
-            onClick={() => handleRoleSelection("customer")}
+            className="cursor-pointer transition-all hover:border-primary hover:shadow-md"
+            onClick={() => handleRoleSelect("customer")}
           >
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="w-8 h-8 text-blue-600" />
-              </div>
-              <CardTitle className="text-2xl">I'm a Customer</CardTitle>
-              <CardDescription className="text-base">Book detailing services for your vehicles</CardDescription>
+              <Users className="mx-auto h-12 w-12 text-primary" />
+              <CardTitle className="mt-4">I'm a Customer</CardTitle>
+              <CardDescription>Looking for auto detailing services</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• Book appointments online</li>
-                <li>• Track service history</li>
-                <li>• Get personalized recommendations</li>
-                <li>• Manage multiple vehicles</li>
-              </ul>
-              <Button
-                className="w-full mt-6"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleRoleSelection("customer")
-                }}
-              >
-                Continue as Customer
-              </Button>
+            <CardContent className="text-center">
+              <p className="mb-4 text-sm text-muted-foreground">
+                Get personalized recommendations, book appointments, and manage your vehicles
+              </p>
+              <Button className="w-full">Continue as Customer</Button>
             </CardContent>
           </Card>
 
           <Card
-            className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
-            onClick={() => handleRoleSelection("business")}
+            className="cursor-pointer transition-all hover:border-primary hover:shadow-md"
+            onClick={() => handleRoleSelect("business")}
           >
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle className="text-2xl">I'm a Business Owner</CardTitle>
-              <CardDescription className="text-base">Manage your auto detailing business</CardDescription>
+              <UserCog className="mx-auto h-12 w-12 text-primary" />
+              <CardTitle className="mt-4">I'm a Business Owner</CardTitle>
+              <CardDescription>Providing auto detailing services</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• Manage appointments & staff</li>
-                <li>• Track inventory & supplies</li>
-                <li>• View analytics & reports</li>
-                <li>• Handle customer relationships</li>
-              </ul>
-              <Button
-                className="w-full mt-6"
-                variant="default"
-                disabled={isLoading}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleRoleSelection("business")
-                }}
-              >
-                Continue as Business
-              </Button>
+            <CardContent className="text-center">
+              <p className="mb-4 text-sm text-muted-foreground">
+                Manage appointments, track inventory, and grow your detailing business
+              </p>
+              <Button className="w-full">Continue as Business</Button>
             </CardContent>
           </Card>
         </div>
