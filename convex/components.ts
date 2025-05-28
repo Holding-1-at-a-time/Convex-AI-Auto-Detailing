@@ -53,3 +53,8 @@ export const updateUIComponents = mutation({
     }
   },
 })
+
+export const components = {
+  getUIComponents,
+  updateUIComponents,
+}
