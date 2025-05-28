@@ -3,6 +3,9 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import "@testing-library/jest-dom"
 import { TextEncoder, TextDecoder } from "util"
+import '@testing-library/jest-dom'
+
+setupFilesAfterEnv: ['<rootDir>/jest.setup.ts']
 
 // Polyfill for encoding which isn't present globally in jsdom
 global.TextEncoder = TextEncoder
