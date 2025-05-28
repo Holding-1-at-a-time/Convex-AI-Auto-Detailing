@@ -12,6 +12,7 @@ export default defineSchema({
     createdAt: v.string(),
     lastLogin: v.optional(v.string()),
     preferences: v.optional(v.any()),
+    imageUrl: v.optional(v.string()),
     clerkId: v.optional(v.string()), // Add this line
   })
     .index("by_email", ["email"])
