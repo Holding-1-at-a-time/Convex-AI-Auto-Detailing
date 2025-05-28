@@ -1,29 +1,45 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+
+import { useUser } from "@clerk/nextjs"
 import Link from "next/link"
 
 export function SiteHeader() {
+  const { isSignedIn, user } = useUser()
+
   return (
-    <header className="border-b border-primary/20 bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-      <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="text-xl font-bold gradient-text">AutoDetailAI</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <a href="#features" className="text-sm font-medium text-secondary-100 hover:text-primary transition-colors">
-            Features
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
+        <div className="mr-4 flex">
+          <a href="/" className="mr-6 flex items-center space-x-2">
+            <span className="font-bold text-xl">AutoDetailAI</span>
           </a>
-          <a
-            href="#testimonials"
-            className="text-sm font-medium text-secondary-100 hover:text-primary transition-colors"
-          >
-            Testimonials
-          </a>
-          <a href="#pricing" className="text-sm font-medium text-secondary-100 hover:text-primary transition-colors">
-            Pricing
-          </a>
-          <a href="#faq" className="text-sm font-medium text-secondary-100 hover:text-primary transition-colors">
-            FAQ
-          </a>
-        </nav>
+        </div>
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <nav className="flex items-center space-x-2">
+            {isSignedIn ? (
+              <Link href="/dashboard">
+                <Button variant="default" size="sm">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button variant="default" size="sm">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
       </div>
     </header>
   )
