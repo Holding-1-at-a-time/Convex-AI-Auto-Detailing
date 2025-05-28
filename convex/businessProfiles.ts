@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
+import { verifyUserRole } from "./utils/auth"
 
 // Create a new business profile
 export const createBusinessProfile = mutation({
@@ -25,6 +26,21 @@ export const createBusinessProfile = mutation({
     socialMedia: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    // Verify user is authorized to create a business profile
+    await verifyUserRole(ctx, ["business", "admin"])
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(args.email)) {
+      throw new Error("Invalid email format")
+    }
+
+    // Validate phone format (simple validation)
+    const phoneRegex = /^\+?[0-9]{10,15}$/
+    if (!phoneRegex.test(args.phone.replace(/[^0-9+]/g, ""))) {
+      throw new Error("Invalid phone number format")
+    }
+
     // Check if a profile already exists for this user
     const existingProfile = await ctx.db
       .query("businessProfiles")
@@ -73,7 +89,7 @@ export const createBusinessProfile = mutation({
   },
 })
 
-// Update a business profile
+// Update a business profile with improved validation
 export const updateBusinessProfile = mutation({
   args: {
     profileId: v.id("businessProfiles"),
@@ -106,6 +122,30 @@ export const updateBusinessProfile = mutation({
       throw new Error("Business profile not found")
     }
 
+    // Verify user is authorized to update this profile
+    const { user } = await verifyUserRole(ctx, ["business", "admin"])
+
+    // Only the owner or an admin can update the profile
+    if (user.role !== "admin" && profile.userId !== user.clerkId) {
+      throw new Error("Unauthorized: You can only update your own business profile")
+    }
+
+    // Validate email if provided
+    if (updates.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(updates.email)) {
+        throw new Error("Invalid email format")
+      }
+    }
+
+    // Validate phone if provided
+    if (updates.phone) {
+      const phoneRegex = /^\+?[0-9]{10,15}$/
+      if (!phoneRegex.test(updates.phone.replace(/[^0-9+]/g, ""))) {
+        throw new Error("Invalid phone number format")
+      }
+    }
+
     // Update the profile
     await ctx.db.patch(profileId, {
       ...updates,
@@ -116,12 +156,23 @@ export const updateBusinessProfile = mutation({
   },
 })
 
-// Get a business profile by user ID
+// Get a business profile by user ID with proper authorization
 export const getBusinessProfileByUserId = query({
   args: {
     userId: v.string(),
   },
   handler: async (ctx, args) => {
+    // Get current user
+    const user = await ctx.auth.getUserIdentity()
+
+    // If requesting another user's profile, verify admin role
+    if (!user || user.subject !== args.userId) {
+      const { user: dbUser } = await verifyUserRole(ctx, ["admin"])
+      if (!dbUser) {
+        throw new Error("Unauthorized: Only admins can view other users' profiles")
+      }
+    }
+
     const profile = await ctx.db
       .query("businessProfiles")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
@@ -131,35 +182,59 @@ export const getBusinessProfileByUserId = query({
   },
 })
 
-// Get a business profile by ID
+// Get a business profile by ID with proper authorization
 export const getBusinessProfile = query({
   args: {
     profileId: v.id("businessProfiles"),
   },
   handler: async (ctx, args) => {
     const profile = await ctx.db.get(args.profileId)
+    if (!profile) {
+      return null
+    }
+
+    // Get current user
+    const user = await ctx.auth.getUserIdentity()
+
+    // If requesting another user's profile, verify admin role
+    if (!user || user.subject !== profile.userId) {
+      try {
+        await verifyUserRole(ctx, ["admin"])
+      } catch (error) {
+        throw new Error("Unauthorized: You can only view your own business profile")
+      }
+    }
+
     return profile
   },
 })
 
-// Mark onboarding as completed
-export const completeOnboarding = mutation({
+// List all business profiles (admin only)
+export const listBusinessProfiles = query({
   args: {
-    profileId: v.id("businessProfiles"),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.id("businessProfiles")),
   },
   handler: async (ctx, args) => {
-    // Check if profile exists
-    const profile = await ctx.db.get(args.profileId)
-    if (!profile) {
-      throw new Error("Business profile not found")
+    // Verify admin role
+    await verifyUserRole(ctx, ["admin"])
+
+    const limit = args.limit ?? 10
+
+    let query = ctx.db.query("businessProfiles")
+
+    if (args.cursor) {
+      query = query.filter((q) => q.gt(q.field("_id"), args.cursor))
     }
 
-    // Mark onboarding as completed
-    await ctx.db.patch(args.profileId, {
-      onboardingCompleted: true,
-      updatedAt: new Date().toISOString(),
-    })
+    const profiles = await query.take(limit)
 
-    return args.profileId
+    // Get the cursor for the next page
+    const cursor = profiles.length === limit ? profiles[profiles.length - 1]._id : null
+
+    return {
+      profiles,
+      cursor,
+    }
   },
 })
