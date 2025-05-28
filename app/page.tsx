@@ -1,131 +1,120 @@
-"use client"
-
-import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useThreeScene } from "@/hooks/use-three-scene"
-import { useFallbackScene } from "@/hooks/use-fallback-scene"
-import { LoadingAnimation } from "@/components/loading-animation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-interface UseThreeSceneProps {
-  containerRef: React.RefObject<HTMLDivElement | null>
-  modelUrl: string
-  onProgress?: (progress: number) => void
-  onLoaded?: () => void
-  // ...
-}
-
-export default function SplashPage() {
-  const router = useRouter()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [loading, setLoading] = useState(true)
-  const [loadingProgress, setLoadingProgress] = useState(0)
-  const [showEnterButton, setShowEnterButton] = useState(false)
-  const [modelError, setModelError] = useState(false)
-  const [useMainScene, setUseMainScene] = useState(true)
-
-  // Try to use the duck model first
-  const carModelUrl = "app/assets/free_bmw_m3_e30.glb"
-
-  const handleProgress = (progress: number) => {
-    setLoadingProgress(progress)
-  }
-
-  const handleLoaded = () => {
-    setLoading(false)
-    setTimeout(() => setShowEnterButton(true), 1000)
-  }
-
-  const handleError = () => {
-    console.log("Model loading failed, switching to fallback scene")
-    setUseMainScene(false)
-    setModelError(true)
-  }
-
-  // Try to use the main scene first
-  useThreeScene({
-    containerRef: containerRef?.current,
-    modelUrl: carModelUrl,
-    onProgress: handleProgress,
-    onLoaded: useMainScene ? handleLoaded : undefined,
-  })
-  // Use fallback scene if main scene fails
-  if (containerRef.current !== null) {
-    useFallbackScene({
-      containerRef: containerRef,
-      onLoaded: !useMainScene ? handleLoaded : undefined,
-    });
-  }
-
-  // If model loading takes too long, switch to fallback
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (loading && useMainScene) {
-        console.log("Model loading timeout, switching to fallback scene")
-        setUseMainScene(false)
-        setModelError(true)
-      }
-    }, 10000) // 10 seconds timeout
-
-    return () => clearTimeout(timeout)
-  }, [loading, useMainScene])
-
-  const handleEnter = () => {
-    router.push("/home")
-  }
-
+export default function Home() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-blue-50 to-white">
-      {/* 3D container */}
-      <div ref={containerRef} className="absolute inset-0 z-0" />
-
-      {/* Overlay content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full">
-        {loading ? (
-          <LoadingAnimation progress={loadingProgress} />
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <motion.h1
-              className="text-5xl font-bold mb-2 text-gray-900"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              AutoDetailAI
-            </motion.h1>
-            <motion.p
-              className="text-xl text-gray-600 mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-            >
-              Your AI-powered detailing assistant
-            </motion.p>
-
-            {showEnterButton && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.5 }}
-              >
-                <Button
-                  size="lg"
-                  onClick={handleEnter}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
-                >
-                  Enter Experience
-                </Button>
-              </motion.div>
-            )}
-          </motion.div>
-        )}
-      </div>
+    <div className="flex flex-col min-h-screen">
+      <header className="border-b">
+        <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <span className="text-xl font-bold">AutoDetailAI</span>
+          </Link>
+          <nav className="ml-auto flex gap-4 sm:gap-6">
+            <Link href="/dashboard" className="text-sm font-medium hover:underline underline-offset-4">
+              Dashboard
+            </Link>
+            <Link href="/chat" className="text-sm font-medium hover:underline underline-offset-4">
+              AI Assistant
+            </Link>
+            <Link href="/analytics" className="text-sm font-medium hover:underline underline-offset-4">
+              Analytics
+            </Link>
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-blue-50 to-white">
+          <div className="container px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="space-y-4">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  AI-Powered Auto Detailing Assistant
+                </h1>
+                <p className="text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Get expert recommendations, predictive maintenance insights, and personalized detailing plans for your
+                  vehicle.
+                </p>
+                <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Link href="/chat">
+                    <Button size="lg" className="w-full min-[400px]:w-auto">
+                      Chat with Assistant
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button size="lg" variant="outline" className="w-full min-[400px]:w-auto">
+                      View Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <img
+                src="/ai-car-detailing.png"
+                alt="AI Auto Detailing"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
+              />
+            </div>
+          </div>
+        </section>
+        <section className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Key Features</h2>
+                <p className="max-w-[900px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Our AI-powered assistant provides comprehensive auto detailing support
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 lg:gap-12 mt-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle>Predictive Analytics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">
+                    Anticipate maintenance needs based on vehicle data, usage patterns, and environmental factors.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle>Personalized Plans</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">
+                    Get customized detailing recommendations based on your vehicle's specific needs and your
+                    preferences.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle>Knowledge Base</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-500">
+                    Access a comprehensive database of detailing techniques, products, and solutions for various issues.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer className="border-t py-6 md:py-0">
+        <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+          <p className="text-sm text-gray-500 md:text-base">© 2025 AutoDetailAI. All rights reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/terms" className="text-sm text-gray-500 hover:underline underline-offset-4">
+              Terms
+            </Link>
+            <Link href="/privacy" className="text-sm text-gray-500 hover:underline underline-offset-4">
+              Privacy
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

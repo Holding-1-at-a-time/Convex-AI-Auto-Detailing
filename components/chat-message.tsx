@@ -20,21 +20,10 @@ export function ChatMessage({ role, content, id, threadId, onFeedbackSubmitted }
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
   const [feedbackRating, setFeedbackRating] = useState<number | null>(null)
 
-  // Check if the API is available
-  const apiAvailable = typeof api.agent?.saveUserFeedback !== "undefined"
-  const saveUserFeedback = apiAvailable ? useMutation(api.agent.saveUserFeedback) : null
+  const saveUserFeedback = useMutation(api.agent.saveUserFeedback)
 
   const handleFeedback = async (rating: number) => {
-    if (!threadId || role !== "assistant" || !apiAvailable) {
-      // If API is not available, still show feedback UI response
-      setFeedbackRating(rating)
-      setFeedbackSubmitted(true)
-
-      if (onFeedbackSubmitted) {
-        onFeedbackSubmitted(rating)
-      }
-      return
-    }
+    if (!threadId || role !== "assistant") return
 
     try {
       await saveUserFeedback({

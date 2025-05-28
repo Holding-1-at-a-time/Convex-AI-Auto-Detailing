@@ -1,15 +1,15 @@
 import { v } from "convex/values"
 import { action, mutation, query } from "./_generated/server"
 import { Agent, createTool } from "@convex-dev/agent"
-import { ollama } from "ollama-ai-provider"
+import { openai } from "@ai-sdk/openai"
 import { components } from "./_generated/api"
 import { internal } from "./_generated/api"
 import { z } from "zod"
 
-// Create the auto detailing agent with Ollama
+// Create the auto detailing agent
 const autoDetailingAgent = new Agent(components.agent, {
-  chat: ollama("llama3.2:latest"),
-  textEmbedding: ollama.embedding("granite-embedding:278m"),
+  chat: openai.chat("gpt-4o"),
+  textEmbedding: openai.embedding("text-embedding-3-small"),
   instructions: `
     You are an AI-powered auto detailing assistant. You help users with:
     

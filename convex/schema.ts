@@ -4,10 +4,8 @@ import { v } from "convex/values"
 export default defineSchema({
   // Users table
   users: defineTable({
-    userId: v.string(),
     name: v.string(),
     email: v.string(),
-    imageUrl: v.optional(v.string()),
     createdAt: v.string(),
   }).index("by_email", ["email"]),
 
@@ -19,10 +17,6 @@ export default defineSchema({
     year: v.number(),
     color: v.optional(v.string()),
     notes: v.optional(v.string()),
-    vin: v.optional(v.string()),
-    imageUrl: v.optional(v.id("files")),
-    lastDetailingDate: v.optional(v.string()),
-    detailingScore: v.optional(v.number()),
     createdAt: v.string(),
   }).index("by_userId", ["userId"]),
 
@@ -41,9 +35,6 @@ export default defineSchema({
     category: v.string(),
     description: v.string(),
     recommendedFor: v.array(v.string()),
-    imageUrl: v.optional(v.string()),
-    price: v.optional(v.number()),
-    brand: v.optional(v.string()),
     createdAt: v.string(),
   }).index("by_category", ["category"]),
 
@@ -75,33 +66,6 @@ export default defineSchema({
     ),
   }).index("by_vehicleId", ["vehicleId"]),
 
-  // Files table
-  files: defineTable({
-    fileName: v.string(),
-    fileType: v.string(),
-    fileSize: v.number(),
-    userId: v.optional(v.string()),
-    vehicleId: v.optional(v.id("vehicles")),
-    storageId: v.id("_storage"),
-    contentType: v.string(),
-    description: v.optional(v.string()),
-    tags: v.optional(v.array(v.string())),
-    uploadedAt: v.string(),
-  })
-    .index("by_userId", ["userId"])
-    .index("by_vehicleId", ["vehicleId"]),
-
-  // Analytics events
-  analyticsEvents: defineTable({
-    userId: v.optional(v.string()),
-    eventType: v.string(),
-    page: v.optional(v.string()),
-    feature: v.optional(v.string()),
-    errorMessage: v.optional(v.string()),
-    metadata: v.optional(v.any()),
-    timestamp: v.string(),
-  }).index("by_userId", ["userId"]),
-
   // Knowledge base embeddings for vector search
   knowledgeEmbeddings: defineTable({
     embedding: v.array(v.float64()),
@@ -109,7 +73,7 @@ export default defineSchema({
     tags: v.array(v.string()),
   }).vectorIndex("by_embedding", {
     vectorField: "embedding",
-    dimensions: 384, // granite-embedding:278m dimensions
+    dimensions: 1536, // OpenAI embedding dimensions
     filterFields: ["category", "tags"],
   }),
 
@@ -129,12 +93,11 @@ export default defineSchema({
   // Product embeddings for vector search
   productEmbeddings: defineTable({
     embedding: v.array(v.float64()),
-    productId: v.id("products"),
     category: v.string(),
     vehicleTypes: v.array(v.string()),
   }).vectorIndex("by_embedding", {
     vectorField: "embedding",
-    dimensions: 384, // granite-embedding:278m dimensions
+    dimensions: 1536,
     filterFields: ["category", "vehicleTypes"],
   }),
 
@@ -146,7 +109,7 @@ export default defineSchema({
     yearRange: v.array(v.number()), // [min_year, max_year]
   }).vectorIndex("by_embedding", {
     vectorField: "embedding",
-    dimensions: 384, // granite-embedding:278m dimensions
+    dimensions: 1536,
     filterFields: ["make"],
   }),
 
@@ -170,7 +133,7 @@ export default defineSchema({
     category: v.optional(v.string()),
   }).vectorIndex("by_embedding", {
     vectorField: "embedding",
-    dimensions: 384, // granite-embedding:278m dimensions
+    dimensions: 1536,
     filterFields: ["category"],
   }),
 
