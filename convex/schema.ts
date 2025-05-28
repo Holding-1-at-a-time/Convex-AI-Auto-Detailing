@@ -26,6 +26,25 @@ export default defineSchema({
     createdAt: v.string(),
   }).index("by_userId", ["userId"]),
 
+  // Car Makes table (for seeded data)
+  carMakes: defineTable({
+    externalId: v.string(),
+    name: v.string(),
+    createdAt: v.string(),
+  }).index("by_externalId", ["externalId"]),
+
+  // Car Models table (for seeded data)
+  carModels: defineTable({
+    externalId: v.string(),
+    makeId: v.id("carMakes"),
+    name: v.string(),
+    yearFrom: v.number(),
+    yearTo: v.number(),
+    createdAt: v.string(),
+  })
+    .index("by_externalId", ["externalId"])
+    .index("by_makeId", ["makeId"]),
+
   // Detailing records table
   detailingRecords: defineTable({
     vehicleId: v.id("vehicles"),
@@ -185,4 +204,17 @@ export default defineSchema({
   })
     .index("by_embedding", ["embeddingId"])
     .index("by_thread", ["threadId"]),
+
+  // Data seeding logs
+  seedingLogs: defineTable({
+    operation: v.string(),
+    status: v.string(), // "success", "failed", "in_progress"
+    startTime: v.string(),
+    endTime: v.optional(v.string()),
+    itemsProcessed: v.number(),
+    itemsSucceeded: v.number(),
+    itemsFailed: v.number(),
+    errorMessage: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+  }).index("by_status", ["status"]),
 })

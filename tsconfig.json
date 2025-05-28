@@ -4,8 +4,6 @@
     "allowJs": true,
     "target": "ES6",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "importHelpers": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,

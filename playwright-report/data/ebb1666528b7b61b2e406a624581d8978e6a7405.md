@@ -5,7 +5,7 @@
 
 # Error details
 
-```
+\`\`\`
 Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
 ╔═════════════════════════════════════════════════════════════════════════╗
 ║ Looks like Playwright Test or Playwright was just installed or updated. ║
@@ -15,11 +15,11 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
 ║                                                                         ║
 ║ <3 Playwright Team                                                      ║
 ╚═════════════════════════════════════════════════════════════════════════╝
-```
+\`\`\`
 
 # Test source
 
-```ts
+\`\`\`ts
    1 | import { test, expect } from "@playwright/test"
    2 | import AxeBuilder from "@axe-core/playwright"
    3 |
@@ -89,4 +89,4 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
   66 |   })
   67 | })
   68 |
-```
+\`\`\`

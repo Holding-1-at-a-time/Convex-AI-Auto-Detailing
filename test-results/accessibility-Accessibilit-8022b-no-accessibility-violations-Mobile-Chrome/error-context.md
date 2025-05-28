@@ -5,7 +5,7 @@
 
 # Error details
 
-```
+\`\`\`
 Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
 ╔═════════════════════════════════════════════════════════════════════════╗
 ║ Looks like Playwright Test or Playwright was just installed or updated. ║
@@ -15,11 +15,11 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
 ║                                                                         ║
 ║ <3 Playwright Team                                                      ║
 ╚═════════════════════════════════════════════════════════════════════════╝
-```
+\`\`\`
 
 # Test source
 
-```ts
+\`\`\`ts
    1 | import { test, expect } from "@playwright/test"
    2 | import { injectAxe, checkA11y } from "axe-playwright"
    3 |
@@ -84,4 +84,4 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
   61 |   })
   62 | })
   63 |
-```
+\`\`\`

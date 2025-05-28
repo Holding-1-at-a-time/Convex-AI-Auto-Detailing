@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, waitFor } from "@/test-utils"
 import { useQuery, useMutation } from "convex/react"
 import ChatPage from "@/app/chat/page"
-import { server, rest } from "msw"
+import { server } from "../mocks/server"
+import { http } from "msw"
 
 jest.mock("convex/react")
 
@@ -91,8 +92,8 @@ describe("API Integration", () => {
   it("handles network errors", async () => {
     // Override MSW handler to simulate network error
     server.use(
-      rest.post("https://test.convex.cloud/api/action", (req, res, ctx) => {
-        return res.networkError("Failed to connect")
+      http.post("https://test.convex.cloud/api/action", () => {
+        return new Response(null, { status: 0 })
       }),
     )
 

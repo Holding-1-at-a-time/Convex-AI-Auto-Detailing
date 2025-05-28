@@ -5,7 +5,7 @@
 
 # Error details
 
-```
+\`\`\`
 Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
 ╔═════════════════════════════════════════════════════════════════════════╗
 ║ Looks like Playwright Test or Playwright was just installed or updated. ║
@@ -15,11 +15,11 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
 ║                                                                         ║
 ║ <3 Playwright Team                                                      ║
 ╚═════════════════════════════════════════════════════════════════════════╝
-```
+\`\`\`
 
 # Test source
 
-```ts
+\`\`\`ts
    1 | import { test, expect } from "@playwright/test"
    2 |
    3 | test.describe("Splash to Chat Flow", () => {
@@ -60,4 +60,4 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Lo
   37 |   })
   38 | })
   39 |
-```
+\`\`\`
