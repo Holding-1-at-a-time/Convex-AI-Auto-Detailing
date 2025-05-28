@@ -8,6 +8,14 @@ import { useThreeScene } from "@/hooks/use-three-scene"
 import { useFallbackScene } from "@/hooks/use-fallback-scene"
 import { LoadingAnimation } from "@/components/loading-animation"
 
+interface UseThreeSceneProps {
+  containerRef: React.RefObject<HTMLDivElement | null>
+  modelUrl: string
+  onProgress?: (progress: number) => void
+  onLoaded?: () => void
+  // ...
+}
+
 export default function SplashPage() {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -18,7 +26,7 @@ export default function SplashPage() {
   const [useMainScene, setUseMainScene] = useState(true)
 
   // Try to use the duck model first
-  const carModelUrl = "assets/free_bmw_m3_e30.glb"
+  const carModelUrl = "app/assets/free_bmw_m3_e30.glb"
 
   const handleProgress = (progress: number) => {
     setLoadingProgress(progress)
@@ -37,17 +45,18 @@ export default function SplashPage() {
 
   // Try to use the main scene first
   useThreeScene({
-    containerRef: useMainScene ? containerRef : { current: null },
+    containerRef: containerRef.current !== null ? containerRef : { current: null },
     modelUrl: carModelUrl,
     onProgress: handleProgress,
     onLoaded: useMainScene ? handleLoaded : undefined,
   })
-
   // Use fallback scene if main scene fails
-  useFallbackScene({
-    containerRef: !useMainScene ? containerRef : { current: null },
-    onLoaded: !useMainScene ? handleLoaded : undefined,
-  })
+  if (containerRef.current !== null) {
+    useFallbackScene({
+      containerRef: containerRef,
+      onLoaded: !useMainScene ? handleLoaded : undefined,
+    });
+  }
 
   // If model loading takes too long, switch to fallback
   useEffect(() => {

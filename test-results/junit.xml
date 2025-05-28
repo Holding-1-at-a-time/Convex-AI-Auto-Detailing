@@ -1,0 +1,2352 @@
+<testsuites id="" name="" tests="100" failures="100" skipped="0" errors="0" time="68.24224799999999">
+<testsuite name="a11y\form-accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="chromium" tests="4" failures="4" skipped="0" time="0.074" errors="0">
+<testcase name="Form Accessibility › chat form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.017">
+<failure message="form-accessibility.spec.ts:5:7 chat form meets accessibility standards" type="FAILURE">
+<![CDATA[  [chromium] › a11y\form-accessibility.spec.ts:5:7 › Form Accessibility › chat form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-12047-ets-accessibility-standards-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-12047-ets-accessibility-standards-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › vehicle upload form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.02">
+<failure message="form-accessibility.spec.ts:15:7 vehicle upload form meets accessibility standards" type="FAILURE">
+<![CDATA[  [chromium] › a11y\form-accessibility.spec.ts:15:7 › Form Accessibility › vehicle upload form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form controls have proper labels" classname="a11y\form-accessibility.spec.ts" time="0.017">
+<failure message="form-accessibility.spec.ts:28:7 form controls have proper labels" type="FAILURE">
+<![CDATA[  [chromium] › a11y\form-accessibility.spec.ts:28:7 › Form Accessibility › form controls have proper labels 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form is keyboard navigable" classname="a11y\form-accessibility.spec.ts" time="0.02">
+<failure message="form-accessibility.spec.ts:48:7 form is keyboard navigable" type="FAILURE">
+<![CDATA[  [chromium] › a11y\form-accessibility.spec.ts:48:7 › Form Accessibility › form is keyboard navigable 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="chromium" tests="5" failures="5" skipped="0" time="0.094" errors="0">
+<testcase name="Accessibility › splash page has no accessibility violations" classname="accessibility.spec.ts" time="0.014">
+<failure message="accessibility.spec.ts:5:7 splash page has no accessibility violations" type="FAILURE">
+<![CDATA[  [chromium] › accessibility.spec.ts:5:7 › Accessibility › splash page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-1018e-no-accessibility-violations-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-1018e-no-accessibility-violations-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › home page has no accessibility violations" classname="accessibility.spec.ts" time="0.014">
+<failure message="accessibility.spec.ts:16:7 home page has no accessibility violations" type="FAILURE">
+<![CDATA[  [chromium] › accessibility.spec.ts:16:7 › Accessibility › home page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-35a19-no-accessibility-violations-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-35a19-no-accessibility-violations-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › chat page has no accessibility violations" classname="accessibility.spec.ts" time="0.02">
+<failure message="accessibility.spec.ts:27:7 chat page has no accessibility violations" type="FAILURE">
+<![CDATA[  [chromium] › accessibility.spec.ts:27:7 › Accessibility › chat page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-8022b-no-accessibility-violations-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-8022b-no-accessibility-violations-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › keyboard navigation works" classname="accessibility.spec.ts" time="0.02">
+<failure message="accessibility.spec.ts:38:7 keyboard navigation works" type="FAILURE">
+<![CDATA[  [chromium] › accessibility.spec.ts:38:7 › Accessibility › keyboard navigation works ──────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-keyboard-navigation-works-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-keyboard-navigation-works-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › screen reader content is present" classname="accessibility.spec.ts" time="0.026">
+<failure message="accessibility.spec.ts:52:7 screen reader content is present" type="FAILURE">
+<![CDATA[  [chromium] › accessibility.spec.ts:52:7 › Accessibility › screen reader content is present ───────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-screen-reader-content-is-present-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-screen-reader-content-is-present-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="chromium" tests="3" failures="3" skipped="0" time="0.06" errors="0">
+<testcase name="Chat Interaction › sends and receives messages" classname="chat-interaction.spec.ts" time="0.017">
+<failure message="chat-interaction.spec.ts:8:7 sends and receives messages" type="FAILURE">
+<![CDATA[  [chromium] › chat-interaction.spec.ts:8:7 › Chat Interaction › sends and receives messages ───────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › switches between chat and upload tabs" classname="chat-interaction.spec.ts" time="0.022">
+<failure message="chat-interaction.spec.ts:23:7 switches between chat and upload tabs" type="FAILURE">
+<![CDATA[  [chromium] › chat-interaction.spec.ts:23:7 › Chat Interaction › switches between chat and upload tabs 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › uploads vehicle data" classname="chat-interaction.spec.ts" time="0.021">
+<failure message="chat-interaction.spec.ts:37:7 uploads vehicle data" type="FAILURE">
+<![CDATA[  [chromium] › chat-interaction.spec.ts:37:7 › Chat Interaction › uploads vehicle data ─────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Interaction-uploads-vehicle-data-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Interaction-uploads-vehicle-data-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="splash-to-chat.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="chromium" tests="2" failures="2" skipped="0" time="0.039" errors="0">
+<testcase name="Splash to Chat Flow › navigates from splash page to chat" classname="splash-to-chat.spec.ts" time="0.021">
+<failure message="splash-to-chat.spec.ts:4:7 navigates from splash page to chat" type="FAILURE">
+<![CDATA[  [chromium] › splash-to-chat.spec.ts:4:7 › Splash to Chat Flow › navigates from splash page to chat 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Splash to Chat Flow › 3D scene loads correctly" classname="splash-to-chat.spec.ts" time="0.018">
+<failure message="splash-to-chat.spec.ts:28:7 3D scene loads correctly" type="FAILURE">
+<![CDATA[  [chromium] › splash-to-chat.spec.ts:28:7 › Splash to Chat Flow › 3D scene loads correctly ────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="visual\visual-regression.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="chromium" tests="6" failures="6" skipped="0" time="0.116" errors="0">
+<testcase name="Visual Regression › splash page visual appearance" classname="visual\visual-regression.spec.ts" time="0.018">
+<failure message="visual-regression.spec.ts:4:7 splash page visual appearance" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:4:7 › Visual Regression › splash page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6053b-lash-page-visual-appearance-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6053b-lash-page-visual-appearance-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › home page visual appearance" classname="visual\visual-regression.spec.ts" time="0.025">
+<failure message="visual-regression.spec.ts:14:7 home page visual appearance" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:14:7 › Visual Regression › home page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-417df-home-page-visual-appearance-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-417df-home-page-visual-appearance-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › chat page visual appearance" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:23:7 chat page visual appearance" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:23:7 › Visual Regression › chat page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6036f-chat-page-visual-appearance-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6036f-chat-page-visual-appearance-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › dashboard page visual appearance" classname="visual\visual-regression.spec.ts" time="0.019">
+<failure message="visual-regression.spec.ts:32:7 dashboard page visual appearance" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:32:7 › Visual Regression › dashboard page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-ecbb3-oard-page-visual-appearance-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-ecbb3-oard-page-visual-appearance-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - mobile" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:41:7 responsive design - mobile" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:41:7 › Visual Regression › responsive design - mobile 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-dd3a7--responsive-design---mobile-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-dd3a7--responsive-design---mobile-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - tablet" classname="visual\visual-regression.spec.ts" time="0.02">
+<failure message="visual-regression.spec.ts:58:7 responsive design - tablet" type="FAILURE">
+<![CDATA[  [chromium] › visual\visual-regression.spec.ts:58:7 › Visual Regression › responsive design - tablet 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-11e3e--responsive-design---tablet-chromium\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-11e3e--responsive-design---tablet-chromium\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="a11y\form-accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="firefox" tests="4" failures="4" skipped="0" time="0.081" errors="0">
+<testcase name="Form Accessibility › chat form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.025">
+<failure message="form-accessibility.spec.ts:5:7 chat form meets accessibility standards" type="FAILURE">
+<![CDATA[  [firefox] › a11y\form-accessibility.spec.ts:5:7 › Form Accessibility › chat form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-12047-ets-accessibility-standards-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-12047-ets-accessibility-standards-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › vehicle upload form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.018">
+<failure message="form-accessibility.spec.ts:15:7 vehicle upload form meets accessibility standards" type="FAILURE">
+<![CDATA[  [firefox] › a11y\form-accessibility.spec.ts:15:7 › Form Accessibility › vehicle upload form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form controls have proper labels" classname="a11y\form-accessibility.spec.ts" time="0.023">
+<failure message="form-accessibility.spec.ts:28:7 form controls have proper labels" type="FAILURE">
+<![CDATA[  [firefox] › a11y\form-accessibility.spec.ts:28:7 › Form Accessibility › form controls have proper labels 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form is keyboard navigable" classname="a11y\form-accessibility.spec.ts" time="0.015">
+<failure message="form-accessibility.spec.ts:48:7 form is keyboard navigable" type="FAILURE">
+<![CDATA[  [firefox] › a11y\form-accessibility.spec.ts:48:7 › Form Accessibility › form is keyboard navigable 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="firefox" tests="5" failures="5" skipped="0" time="0.095" errors="0">
+<testcase name="Accessibility › splash page has no accessibility violations" classname="accessibility.spec.ts" time="0.021">
+<failure message="accessibility.spec.ts:5:7 splash page has no accessibility violations" type="FAILURE">
+<![CDATA[  [firefox] › accessibility.spec.ts:5:7 › Accessibility › splash page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-1018e-no-accessibility-violations-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-1018e-no-accessibility-violations-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › home page has no accessibility violations" classname="accessibility.spec.ts" time="0.017">
+<failure message="accessibility.spec.ts:16:7 home page has no accessibility violations" type="FAILURE">
+<![CDATA[  [firefox] › accessibility.spec.ts:16:7 › Accessibility › home page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-35a19-no-accessibility-violations-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-35a19-no-accessibility-violations-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › chat page has no accessibility violations" classname="accessibility.spec.ts" time="0.019">
+<failure message="accessibility.spec.ts:27:7 chat page has no accessibility violations" type="FAILURE">
+<![CDATA[  [firefox] › accessibility.spec.ts:27:7 › Accessibility › chat page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-8022b-no-accessibility-violations-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-8022b-no-accessibility-violations-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › keyboard navigation works" classname="accessibility.spec.ts" time="0.022">
+<failure message="accessibility.spec.ts:38:7 keyboard navigation works" type="FAILURE">
+<![CDATA[  [firefox] › accessibility.spec.ts:38:7 › Accessibility › keyboard navigation works ───────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-keyboard-navigation-works-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-keyboard-navigation-works-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › screen reader content is present" classname="accessibility.spec.ts" time="0.016">
+<failure message="accessibility.spec.ts:52:7 screen reader content is present" type="FAILURE">
+<![CDATA[  [firefox] › accessibility.spec.ts:52:7 › Accessibility › screen reader content is present ────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-screen-reader-content-is-present-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-screen-reader-content-is-present-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="firefox" tests="3" failures="3" skipped="0" time="0.066" errors="0">
+<testcase name="Chat Interaction › sends and receives messages" classname="chat-interaction.spec.ts" time="0.022">
+<failure message="chat-interaction.spec.ts:8:7 sends and receives messages" type="FAILURE">
+<![CDATA[  [firefox] › chat-interaction.spec.ts:8:7 › Chat Interaction › sends and receives messages ────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › switches between chat and upload tabs" classname="chat-interaction.spec.ts" time="0.025">
+<failure message="chat-interaction.spec.ts:23:7 switches between chat and upload tabs" type="FAILURE">
+<![CDATA[  [firefox] › chat-interaction.spec.ts:23:7 › Chat Interaction › switches between chat and upload tabs 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › uploads vehicle data" classname="chat-interaction.spec.ts" time="0.019">
+<failure message="chat-interaction.spec.ts:37:7 uploads vehicle data" type="FAILURE">
+<![CDATA[  [firefox] › chat-interaction.spec.ts:37:7 › Chat Interaction › uploads vehicle data ──────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Interaction-uploads-vehicle-data-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Interaction-uploads-vehicle-data-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="splash-to-chat.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="firefox" tests="2" failures="2" skipped="0" time="0.041" errors="0">
+<testcase name="Splash to Chat Flow › navigates from splash page to chat" classname="splash-to-chat.spec.ts" time="0.022">
+<failure message="splash-to-chat.spec.ts:4:7 navigates from splash page to chat" type="FAILURE">
+<![CDATA[  [firefox] › splash-to-chat.spec.ts:4:7 › Splash to Chat Flow › navigates from splash page to chat 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Splash to Chat Flow › 3D scene loads correctly" classname="splash-to-chat.spec.ts" time="0.019">
+<failure message="splash-to-chat.spec.ts:28:7 3D scene loads correctly" type="FAILURE">
+<![CDATA[  [firefox] › splash-to-chat.spec.ts:28:7 › Splash to Chat Flow › 3D scene loads correctly ─────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="visual\visual-regression.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="firefox" tests="6" failures="6" skipped="0" time="0.114" errors="0">
+<testcase name="Visual Regression › splash page visual appearance" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:4:7 splash page visual appearance" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:4:7 › Visual Regression › splash page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6053b-lash-page-visual-appearance-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6053b-lash-page-visual-appearance-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › home page visual appearance" classname="visual\visual-regression.spec.ts" time="0.016">
+<failure message="visual-regression.spec.ts:14:7 home page visual appearance" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:14:7 › Visual Regression › home page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-417df-home-page-visual-appearance-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-417df-home-page-visual-appearance-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › chat page visual appearance" classname="visual\visual-regression.spec.ts" time="0.018">
+<failure message="visual-regression.spec.ts:23:7 chat page visual appearance" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:23:7 › Visual Regression › chat page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6036f-chat-page-visual-appearance-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6036f-chat-page-visual-appearance-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › dashboard page visual appearance" classname="visual\visual-regression.spec.ts" time="0.019">
+<failure message="visual-regression.spec.ts:32:7 dashboard page visual appearance" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:32:7 › Visual Regression › dashboard page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-ecbb3-oard-page-visual-appearance-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-ecbb3-oard-page-visual-appearance-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - mobile" classname="visual\visual-regression.spec.ts" time="0.027">
+<failure message="visual-regression.spec.ts:41:7 responsive design - mobile" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:41:7 › Visual Regression › responsive design - mobile 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-dd3a7--responsive-design---mobile-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-dd3a7--responsive-design---mobile-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - tablet" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:58:7 responsive design - tablet" type="FAILURE">
+<![CDATA[  [firefox] › visual\visual-regression.spec.ts:58:7 › Visual Regression › responsive design - tablet 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\firefox-1482\firefox\firefox.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-11e3e--responsive-design---tablet-firefox\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-11e3e--responsive-design---tablet-firefox\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="a11y\form-accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="webkit" tests="4" failures="4" skipped="0" time="0.102" errors="0">
+<testcase name="Form Accessibility › chat form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.019">
+<failure message="form-accessibility.spec.ts:5:7 chat form meets accessibility standards" type="FAILURE">
+<![CDATA[  [webkit] › a11y\form-accessibility.spec.ts:5:7 › Form Accessibility › chat form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-12047-ets-accessibility-standards-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-12047-ets-accessibility-standards-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › vehicle upload form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.021">
+<failure message="form-accessibility.spec.ts:15:7 vehicle upload form meets accessibility standards" type="FAILURE">
+<![CDATA[  [webkit] › a11y\form-accessibility.spec.ts:15:7 › Form Accessibility › vehicle upload form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form controls have proper labels" classname="a11y\form-accessibility.spec.ts" time="0.018">
+<failure message="form-accessibility.spec.ts:28:7 form controls have proper labels" type="FAILURE">
+<![CDATA[  [webkit] › a11y\form-accessibility.spec.ts:28:7 › Form Accessibility › form controls have proper labels 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form is keyboard navigable" classname="a11y\form-accessibility.spec.ts" time="0.044">
+<failure message="form-accessibility.spec.ts:48:7 form is keyboard navigable" type="FAILURE">
+<![CDATA[  [webkit] › a11y\form-accessibility.spec.ts:48:7 › Form Accessibility › form is keyboard navigable 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="webkit" tests="5" failures="5" skipped="0" time="0.092" errors="0">
+<testcase name="Accessibility › splash page has no accessibility violations" classname="accessibility.spec.ts" time="0.016">
+<failure message="accessibility.spec.ts:5:7 splash page has no accessibility violations" type="FAILURE">
+<![CDATA[  [webkit] › accessibility.spec.ts:5:7 › Accessibility › splash page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-1018e-no-accessibility-violations-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-1018e-no-accessibility-violations-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › home page has no accessibility violations" classname="accessibility.spec.ts" time="0.015">
+<failure message="accessibility.spec.ts:16:7 home page has no accessibility violations" type="FAILURE">
+<![CDATA[  [webkit] › accessibility.spec.ts:16:7 › Accessibility › home page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-35a19-no-accessibility-violations-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-35a19-no-accessibility-violations-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › chat page has no accessibility violations" classname="accessibility.spec.ts" time="0.021">
+<failure message="accessibility.spec.ts:27:7 chat page has no accessibility violations" type="FAILURE">
+<![CDATA[  [webkit] › accessibility.spec.ts:27:7 › Accessibility › chat page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-8022b-no-accessibility-violations-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-8022b-no-accessibility-violations-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › keyboard navigation works" classname="accessibility.spec.ts" time="0.017">
+<failure message="accessibility.spec.ts:38:7 keyboard navigation works" type="FAILURE">
+<![CDATA[  [webkit] › accessibility.spec.ts:38:7 › Accessibility › keyboard navigation works ────────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-keyboard-navigation-works-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-keyboard-navigation-works-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › screen reader content is present" classname="accessibility.spec.ts" time="0.023">
+<failure message="accessibility.spec.ts:52:7 screen reader content is present" type="FAILURE">
+<![CDATA[  [webkit] › accessibility.spec.ts:52:7 › Accessibility › screen reader content is present ─────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-screen-reader-content-is-present-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-screen-reader-content-is-present-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="webkit" tests="3" failures="3" skipped="0" time="0.097" errors="0">
+<testcase name="Chat Interaction › sends and receives messages" classname="chat-interaction.spec.ts" time="0.034">
+<failure message="chat-interaction.spec.ts:8:7 sends and receives messages" type="FAILURE">
+<![CDATA[  [webkit] › chat-interaction.spec.ts:8:7 › Chat Interaction › sends and receives messages ─────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › switches between chat and upload tabs" classname="chat-interaction.spec.ts" time="0.046">
+<failure message="chat-interaction.spec.ts:23:7 switches between chat and upload tabs" type="FAILURE">
+<![CDATA[  [webkit] › chat-interaction.spec.ts:23:7 › Chat Interaction › switches between chat and upload tabs 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › uploads vehicle data" classname="chat-interaction.spec.ts" time="0.017">
+<failure message="chat-interaction.spec.ts:37:7 uploads vehicle data" type="FAILURE">
+<![CDATA[  [webkit] › chat-interaction.spec.ts:37:7 › Chat Interaction › uploads vehicle data ───────────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Interaction-uploads-vehicle-data-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Interaction-uploads-vehicle-data-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="splash-to-chat.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="webkit" tests="2" failures="2" skipped="0" time="0.037" errors="0">
+<testcase name="Splash to Chat Flow › navigates from splash page to chat" classname="splash-to-chat.spec.ts" time="0.017">
+<failure message="splash-to-chat.spec.ts:4:7 navigates from splash page to chat" type="FAILURE">
+<![CDATA[  [webkit] › splash-to-chat.spec.ts:4:7 › Splash to Chat Flow › navigates from splash page to chat ─
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Splash to Chat Flow › 3D scene loads correctly" classname="splash-to-chat.spec.ts" time="0.02">
+<failure message="splash-to-chat.spec.ts:28:7 3D scene loads correctly" type="FAILURE">
+<![CDATA[  [webkit] › splash-to-chat.spec.ts:28:7 › Splash to Chat Flow › 3D scene loads correctly ──────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="visual\visual-regression.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="webkit" tests="6" failures="6" skipped="0" time="0.138" errors="0">
+<testcase name="Visual Regression › splash page visual appearance" classname="visual\visual-regression.spec.ts" time="0.018">
+<failure message="visual-regression.spec.ts:4:7 splash page visual appearance" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:4:7 › Visual Regression › splash page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6053b-lash-page-visual-appearance-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6053b-lash-page-visual-appearance-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › home page visual appearance" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:14:7 home page visual appearance" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:14:7 › Visual Regression › home page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-417df-home-page-visual-appearance-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-417df-home-page-visual-appearance-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › chat page visual appearance" classname="visual\visual-regression.spec.ts" time="0.022">
+<failure message="visual-regression.spec.ts:23:7 chat page visual appearance" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:23:7 › Visual Regression › chat page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6036f-chat-page-visual-appearance-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6036f-chat-page-visual-appearance-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › dashboard page visual appearance" classname="visual\visual-regression.spec.ts" time="0.029">
+<failure message="visual-regression.spec.ts:32:7 dashboard page visual appearance" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:32:7 › Visual Regression › dashboard page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-ecbb3-oard-page-visual-appearance-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-ecbb3-oard-page-visual-appearance-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - mobile" classname="visual\visual-regression.spec.ts" time="0.035">
+<failure message="visual-regression.spec.ts:41:7 responsive design - mobile" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:41:7 › Visual Regression › responsive design - mobile 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-dd3a7--responsive-design---mobile-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-dd3a7--responsive-design---mobile-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - tablet" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:58:7 responsive design - tablet" type="FAILURE">
+<![CDATA[  [webkit] › visual\visual-regression.spec.ts:58:7 › Visual Regression › responsive design - tablet 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-11e3e--responsive-design---tablet-webkit\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-11e3e--responsive-design---tablet-webkit\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="a11y\form-accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Chrome" tests="4" failures="4" skipped="0" time="0.079" errors="0">
+<testcase name="Form Accessibility › chat form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.019">
+<failure message="form-accessibility.spec.ts:5:7 chat form meets accessibility standards" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › a11y\form-accessibility.spec.ts:5:7 › Form Accessibility › chat form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-12047-ets-accessibility-standards-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-12047-ets-accessibility-standards-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › vehicle upload form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.018">
+<failure message="form-accessibility.spec.ts:15:7 vehicle upload form meets accessibility standards" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › a11y\form-accessibility.spec.ts:15:7 › Form Accessibility › vehicle upload form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form controls have proper labels" classname="a11y\form-accessibility.spec.ts" time="0.025">
+<failure message="form-accessibility.spec.ts:28:7 form controls have proper labels" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › a11y\form-accessibility.spec.ts:28:7 › Form Accessibility › form controls have proper labels 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form is keyboard navigable" classname="a11y\form-accessibility.spec.ts" time="0.017">
+<failure message="form-accessibility.spec.ts:48:7 form is keyboard navigable" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › a11y\form-accessibility.spec.ts:48:7 › Form Accessibility › form is keyboard navigable 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Chrome" tests="5" failures="5" skipped="0" time="0.093" errors="0">
+<testcase name="Accessibility › splash page has no accessibility violations" classname="accessibility.spec.ts" time="0.019">
+<failure message="accessibility.spec.ts:5:7 splash page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › accessibility.spec.ts:5:7 › Accessibility › splash page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-1018e-no-accessibility-violations-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-1018e-no-accessibility-violations-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › home page has no accessibility violations" classname="accessibility.spec.ts" time="0.017">
+<failure message="accessibility.spec.ts:16:7 home page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › accessibility.spec.ts:16:7 › Accessibility › home page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-35a19-no-accessibility-violations-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-35a19-no-accessibility-violations-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › chat page has no accessibility violations" classname="accessibility.spec.ts" time="0.022">
+<failure message="accessibility.spec.ts:27:7 chat page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › accessibility.spec.ts:27:7 › Accessibility › chat page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-8022b-no-accessibility-violations-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-8022b-no-accessibility-violations-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › keyboard navigation works" classname="accessibility.spec.ts" time="0.016">
+<failure message="accessibility.spec.ts:38:7 keyboard navigation works" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › accessibility.spec.ts:38:7 › Accessibility › keyboard navigation works ─────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-keyboard-navigation-works-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-keyboard-navigation-works-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › screen reader content is present" classname="accessibility.spec.ts" time="0.019">
+<failure message="accessibility.spec.ts:52:7 screen reader content is present" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › accessibility.spec.ts:52:7 › Accessibility › screen reader content is present ──
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-screen-reader-content-is-present-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-screen-reader-content-is-present-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Chrome" tests="3" failures="3" skipped="0" time="0.06" errors="0">
+<testcase name="Chat Interaction › sends and receives messages" classname="chat-interaction.spec.ts" time="0.019">
+<failure message="chat-interaction.spec.ts:8:7 sends and receives messages" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › chat-interaction.spec.ts:8:7 › Chat Interaction › sends and receives messages ──
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › switches between chat and upload tabs" classname="chat-interaction.spec.ts" time="0.017">
+<failure message="chat-interaction.spec.ts:23:7 switches between chat and upload tabs" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › chat-interaction.spec.ts:23:7 › Chat Interaction › switches between chat and upload tabs 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › uploads vehicle data" classname="chat-interaction.spec.ts" time="0.024">
+<failure message="chat-interaction.spec.ts:37:7 uploads vehicle data" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › chat-interaction.spec.ts:37:7 › Chat Interaction › uploads vehicle data ────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Interaction-uploads-vehicle-data-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Interaction-uploads-vehicle-data-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="splash-to-chat.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Chrome" tests="2" failures="2" skipped="0" time="0.04" errors="0">
+<testcase name="Splash to Chat Flow › navigates from splash page to chat" classname="splash-to-chat.spec.ts" time="0.019">
+<failure message="splash-to-chat.spec.ts:4:7 navigates from splash page to chat" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › splash-to-chat.spec.ts:4:7 › Splash to Chat Flow › navigates from splash page to chat 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Splash to Chat Flow › 3D scene loads correctly" classname="splash-to-chat.spec.ts" time="0.021">
+<failure message="splash-to-chat.spec.ts:28:7 3D scene loads correctly" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › splash-to-chat.spec.ts:28:7 › Splash to Chat Flow › 3D scene loads correctly ───
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="visual\visual-regression.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Chrome" tests="6" failures="6" skipped="0" time="0.119" errors="0">
+<testcase name="Visual Regression › splash page visual appearance" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:4:7 splash page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:4:7 › Visual Regression › splash page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6053b-lash-page-visual-appearance-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6053b-lash-page-visual-appearance-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › home page visual appearance" classname="visual\visual-regression.spec.ts" time="0.021">
+<failure message="visual-regression.spec.ts:14:7 home page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:14:7 › Visual Regression › home page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-417df-home-page-visual-appearance-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-417df-home-page-visual-appearance-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › chat page visual appearance" classname="visual\visual-regression.spec.ts" time="0.019">
+<failure message="visual-regression.spec.ts:23:7 chat page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:23:7 › Visual Regression › chat page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6036f-chat-page-visual-appearance-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6036f-chat-page-visual-appearance-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › dashboard page visual appearance" classname="visual\visual-regression.spec.ts" time="0.018">
+<failure message="visual-regression.spec.ts:32:7 dashboard page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:32:7 › Visual Regression › dashboard page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-ecbb3-oard-page-visual-appearance-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-ecbb3-oard-page-visual-appearance-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - mobile" classname="visual\visual-regression.spec.ts" time="0.021">
+<failure message="visual-regression.spec.ts:41:7 responsive design - mobile" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:41:7 › Visual Regression › responsive design - mobile 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-dd3a7--responsive-design---mobile-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-dd3a7--responsive-design---mobile-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - tablet" classname="visual\visual-regression.spec.ts" time="0.023">
+<failure message="visual-regression.spec.ts:58:7 responsive design - tablet" type="FAILURE">
+<![CDATA[  [Mobile Chrome] › visual\visual-regression.spec.ts:58:7 › Visual Regression › responsive design - tablet 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-11e3e--responsive-design---tablet-Mobile-Chrome\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-11e3e--responsive-design---tablet-Mobile-Chrome\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="a11y\form-accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Safari" tests="4" failures="4" skipped="0" time="0.09" errors="0">
+<testcase name="Form Accessibility › chat form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.028">
+<failure message="form-accessibility.spec.ts:5:7 chat form meets accessibility standards" type="FAILURE">
+<![CDATA[  [Mobile Safari] › a11y\form-accessibility.spec.ts:5:7 › Form Accessibility › chat form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-12047-ets-accessibility-standards-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-12047-ets-accessibility-standards-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › vehicle upload form meets accessibility standards" classname="a11y\form-accessibility.spec.ts" time="0.023">
+<failure message="form-accessibility.spec.ts:15:7 vehicle upload form meets accessibility standards" type="FAILURE">
+<![CDATA[  [Mobile Safari] › a11y\form-accessibility.spec.ts:15:7 › Form Accessibility › vehicle upload form meets accessibility standards 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-a5104-ets-accessibility-standards-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form controls have proper labels" classname="a11y\form-accessibility.spec.ts" time="0.018">
+<failure message="form-accessibility.spec.ts:28:7 form controls have proper labels" type="FAILURE">
+<![CDATA[  [Mobile Safari] › a11y\form-accessibility.spec.ts:28:7 › Form Accessibility › form controls have proper labels 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-1645a-controls-have-proper-labels-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Form Accessibility › form is keyboard navigable" classname="a11y\form-accessibility.spec.ts" time="0.021">
+<failure message="form-accessibility.spec.ts:48:7 form is keyboard navigable" type="FAILURE">
+<![CDATA[  [Mobile Safari] › a11y\form-accessibility.spec.ts:48:7 › Form Accessibility › form is keyboard navigable 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|a11y-form-accessibility-Fo-80529--form-is-keyboard-navigable-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="accessibility.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Safari" tests="5" failures="5" skipped="0" time="0.106" errors="0">
+<testcase name="Accessibility › splash page has no accessibility violations" classname="accessibility.spec.ts" time="0.018">
+<failure message="accessibility.spec.ts:5:7 splash page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Safari] › accessibility.spec.ts:5:7 › Accessibility › splash page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-1018e-no-accessibility-violations-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-1018e-no-accessibility-violations-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › home page has no accessibility violations" classname="accessibility.spec.ts" time="0.021">
+<failure message="accessibility.spec.ts:16:7 home page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Safari] › accessibility.spec.ts:16:7 › Accessibility › home page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-35a19-no-accessibility-violations-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-35a19-no-accessibility-violations-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › chat page has no accessibility violations" classname="accessibility.spec.ts" time="0.017">
+<failure message="accessibility.spec.ts:27:7 chat page has no accessibility violations" type="FAILURE">
+<![CDATA[  [Mobile Safari] › accessibility.spec.ts:27:7 › Accessibility › chat page has no accessibility violations 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibilit-8022b-no-accessibility-violations-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibilit-8022b-no-accessibility-violations-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › keyboard navigation works" classname="accessibility.spec.ts" time="0.022">
+<failure message="accessibility.spec.ts:38:7 keyboard navigation works" type="FAILURE">
+<![CDATA[  [Mobile Safari] › accessibility.spec.ts:38:7 › Accessibility › keyboard navigation works ─────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-keyboard-navigation-works-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-keyboard-navigation-works-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Accessibility › screen reader content is present" classname="accessibility.spec.ts" time="0.028">
+<failure message="accessibility.spec.ts:52:7 screen reader content is present" type="FAILURE">
+<![CDATA[  [Mobile Safari] › accessibility.spec.ts:52:7 › Accessibility › screen reader content is present ──
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\accessibility-Accessibility-screen-reader-content-is-present-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|accessibility-Accessibility-screen-reader-content-is-present-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="chat-interaction.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Safari" tests="3" failures="3" skipped="0" time="0.072" errors="0">
+<testcase name="Chat Interaction › sends and receives messages" classname="chat-interaction.spec.ts" time="0.022">
+<failure message="chat-interaction.spec.ts:8:7 sends and receives messages" type="FAILURE">
+<![CDATA[  [Mobile Safari] › chat-interaction.spec.ts:8:7 › Chat Interaction › sends and receives messages ──
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-2699d-sends-and-receives-messages-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › switches between chat and upload tabs" classname="chat-interaction.spec.ts" time="0.029">
+<failure message="chat-interaction.spec.ts:23:7 switches between chat and upload tabs" type="FAILURE">
+<![CDATA[  [Mobile Safari] › chat-interaction.spec.ts:23:7 › Chat Interaction › switches between chat and upload tabs 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Inte-19642-etween-chat-and-upload-tabs-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Chat Interaction › uploads vehicle data" classname="chat-interaction.spec.ts" time="0.021">
+<failure message="chat-interaction.spec.ts:37:7 uploads vehicle data" type="FAILURE">
+<![CDATA[  [Mobile Safari] › chat-interaction.spec.ts:37:7 › Chat Interaction › uploads vehicle data ────────
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\chat-interaction-Chat-Interaction-uploads-vehicle-data-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|chat-interaction-Chat-Interaction-uploads-vehicle-data-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="splash-to-chat.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Safari" tests="2" failures="2" skipped="0" time="0.038" errors="0">
+<testcase name="Splash to Chat Flow › navigates from splash page to chat" classname="splash-to-chat.spec.ts" time="0.019">
+<failure message="splash-to-chat.spec.ts:4:7 navigates from splash page to chat" type="FAILURE">
+<![CDATA[  [Mobile Safari] › splash-to-chat.spec.ts:4:7 › Splash to Chat Flow › navigates from splash page to chat 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-C-0987e-es-from-splash-page-to-chat-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Splash to Chat Flow › 3D scene loads correctly" classname="splash-to-chat.spec.ts" time="0.019">
+<failure message="splash-to-chat.spec.ts:28:7 3D scene loads correctly" type="FAILURE">
+<![CDATA[  [Mobile Safari] › splash-to-chat.spec.ts:28:7 › Splash to Chat Flow › 3D scene loads correctly ───
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|splash-to-chat-Splash-to-Chat-Flow-3D-scene-loads-correctly-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="visual\visual-regression.spec.ts" timestamp="2025-05-28T05:45:51.096Z" hostname="Mobile Safari" tests="6" failures="6" skipped="0" time="0.125" errors="0">
+<testcase name="Visual Regression › splash page visual appearance" classname="visual\visual-regression.spec.ts" time="0.021">
+<failure message="visual-regression.spec.ts:4:7 splash page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:4:7 › Visual Regression › splash page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6053b-lash-page-visual-appearance-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6053b-lash-page-visual-appearance-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › home page visual appearance" classname="visual\visual-regression.spec.ts" time="0.022">
+<failure message="visual-regression.spec.ts:14:7 home page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:14:7 › Visual Regression › home page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-417df-home-page-visual-appearance-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-417df-home-page-visual-appearance-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › chat page visual appearance" classname="visual\visual-regression.spec.ts" time="0.026">
+<failure message="visual-regression.spec.ts:23:7 chat page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:23:7 › Visual Regression › chat page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-6036f-chat-page-visual-appearance-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-6036f-chat-page-visual-appearance-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › dashboard page visual appearance" classname="visual\visual-regression.spec.ts" time="0.023">
+<failure message="visual-regression.spec.ts:32:7 dashboard page visual appearance" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:32:7 › Visual Regression › dashboard page visual appearance 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-ecbb3-oard-page-visual-appearance-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-ecbb3-oard-page-visual-appearance-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - mobile" classname="visual\visual-regression.spec.ts" time="0.016">
+<failure message="visual-regression.spec.ts:41:7 responsive design - mobile" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:41:7 › Visual Regression › responsive design - mobile 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-dd3a7--responsive-design---mobile-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-dd3a7--responsive-design---mobile-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Visual Regression › responsive design - tablet" classname="visual\visual-regression.spec.ts" time="0.017">
+<failure message="visual-regression.spec.ts:58:7 responsive design - tablet" type="FAILURE">
+<![CDATA[  [Mobile Safari] › visual\visual-regression.spec.ts:58:7 › Visual Regression › responsive design - tablet 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\rrome\AppData\Local\ms-playwright\webkit-2158\Playwright.exe
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright Test or Playwright was just installed or updated. ║
+    ║ Please run the following command to download new browsers:              ║
+    ║                                                                         ║
+    ║     pnpm exec playwright install                                        ║
+    ║                                                                         ║
+    ║ <3 Playwright Team                                                      ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+
+    Error Context: ..\test-results\visual-visual-regression-V-11e3e--responsive-design---tablet-Mobile-Safari\error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|visual-visual-regression-V-11e3e--responsive-design---tablet-Mobile-Safari\error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>
