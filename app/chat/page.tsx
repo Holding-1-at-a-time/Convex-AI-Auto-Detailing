@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { Send } from "lucide-react"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation, useQuery, useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,7 @@ export default function ChatPage() {
   const [threadId, setThreadId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [workflowId, setWorkflowId] = useState<string | null>(null)
   const [vehicleData, setVehicleData] = useState({
     make: "",
     model: "",
@@ -36,7 +37,9 @@ export default function ChatPage() {
   const { toast } = useToast()
 
   const createThread = useMutation(api.agent.createThread)
-  const sendMessage = useMutation(api.agent.sendMessage)
+  const sendMessage = useAction(api.agent.sendMessage)
+  const startWorkflow = useAction(api.workflow.startAutoDetailingWorkflow)
+  const getWorkflowStatus = useAction(api.workflow.getWorkflowStatus)
   const addVehicle = useMutation(api.vehicles.addVehicle)
   const threadHistory = useQuery(api.agent.getThreadHistory, threadId ? { threadId } : "skip")
 
@@ -51,6 +54,31 @@ export default function ChatPage() {
       setMessages(formattedMessages)
     }
   }, [threadHistory])
+
+  // Check workflow status when workflowId changes
+  useEffect(() => {
+    if (workflowId) {
+      const checkStatus = async () => {
+        const status = await getWorkflowStatus({ workflowId })
+        if (status.state === "completed") {
+          setWorkflowId(null)
+          setIsLoading(false)
+        } else if (status.state === "failed") {
+          toast({
+            title: "Workflow Failed",
+            description: "The assistant workflow failed. Please try again.",
+            variant: "destructive",
+          })
+          setWorkflowId(null)
+          setIsLoading(false)
+        } else {
+          // Check again in 1 second
+          setTimeout(checkStatus, 1000)
+        }
+      }
+      checkStatus()
+    }
+  }, [workflowId, getWorkflowStatus, toast])
 
   useEffect(() => {
     // Scroll to bottom whenever messages change
@@ -80,14 +108,19 @@ export default function ChatPage() {
       // Clear input
       setInput("")
 
-      // Send message to agent
-      const response = await sendMessage({
+      // Use workflow for more complex interactions
+      const userId = "user123" // Replace with actual user ID in production
+      const result = await startWorkflow({
+        prompt: input,
+        userId,
         threadId: currentThreadId,
-        message: input,
+        vehicleId: null, // Replace with actual vehicle ID if available
       })
 
-      // Add assistant response to UI
-      setMessages((prev) => [...prev, { role: "assistant", content: response.text, id: response.messageId }])
+      setWorkflowId(result.workflowId)
+
+      // The workflow will update the thread, and the thread history will be updated
+      // when the workflow completes
     } catch (error) {
       console.error("Error sending message:", error)
       toast({
@@ -95,7 +128,6 @@ export default function ChatPage() {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
@@ -160,14 +192,15 @@ export default function ChatPage() {
       const userMessageId = Date.now().toString()
       setMessages((prev) => [...prev, { role: "user", content: initialMessage, id: userMessageId }])
 
-      // Send message to agent
-      const response = await sendMessage({
+      // Start workflow with vehicle information
+      const result = await startWorkflow({
+        prompt: initialMessage,
+        userId: "user123", // Replace with actual user ID in production
         threadId: currentThreadId,
-        message: initialMessage,
+        vehicleId,
       })
 
-      // Add assistant response to UI
-      setMessages((prev) => [...prev, { role: "assistant", content: response.text, id: response.messageId }])
+      setWorkflowId(result.workflowId)
 
       // Switch to chat tab
       document.querySelector('[data-value="chat"]')?.dispatchEvent(new MouseEvent("click", { bubbles: true }))

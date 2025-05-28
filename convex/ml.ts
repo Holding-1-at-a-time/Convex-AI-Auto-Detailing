@@ -258,7 +258,7 @@ export const predictDetailingSchedule = action({
 
     if (detailingHistory.length >= 2) {
       const sortedHistory = [...detailingHistory].sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       )
 
       for (let i = 1; i < sortedHistory.length; i++) {

@@ -6,8 +6,15 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
+    role: v.optional(v.string()), // "admin", "staff", "customer"
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
     createdAt: v.string(),
-  }).index("by_email", ["email"]),
+    lastLogin: v.optional(v.string()),
+    preferences: v.optional(v.any()),
+  })
+    .index("by_email", ["email"])
+    .index("by_role", ["role"]),
 
   // Vehicles table
   vehicles: defineTable({
@@ -16,36 +23,67 @@ export default defineSchema({
     model: v.string(),
     year: v.number(),
     color: v.optional(v.string()),
+    vin: v.optional(v.string()),
+    licensePlate: v.optional(v.string()),
     notes: v.optional(v.string()),
     createdAt: v.string(),
-  }).index("by_userId", ["userId"]),
+    lastUpdated: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_make_model", ["make", "model"]),
 
   // Detailing records table
   detailingRecords: defineTable({
     vehicleId: v.id("vehicles"),
+    userId: v.string(),
     service: v.string(),
     date: v.string(),
+    price: v.optional(v.number()),
+    staffId: v.optional(v.string()),
     notes: v.optional(v.string()),
+    products: v.optional(v.array(v.id("products"))),
+    beforeImages: v.optional(v.array(v.string())),
+    afterImages: v.optional(v.array(v.string())),
     createdAt: v.string(),
-  }).index("by_vehicleId", ["vehicleId"]),
+  })
+    .index("by_vehicleId", ["vehicleId"])
+    .index("by_userId", ["userId"])
+    .index("by_date", ["date"])
+    .index("by_service", ["service"]),
 
   // Products table
   products: defineTable({
     name: v.string(),
     category: v.string(),
     description: v.string(),
+    price: v.optional(v.number()),
+    cost: v.optional(v.number()),
+    sku: v.optional(v.string()),
+    supplier: v.optional(v.string()),
     recommendedFor: v.array(v.string()),
+    inStock: v.optional(v.boolean()),
+    stockQuantity: v.optional(v.number()),
+    reorderThreshold: v.optional(v.number()),
     createdAt: v.string(),
-  }).index("by_category", ["category"]),
+    lastUpdated: v.optional(v.string()),
+  })
+    .index("by_category", ["category"])
+    .index("by_name", ["name"])
+    .index("by_supplier", ["supplier"]),
 
   // Product usage records
   productUsage: defineTable({
     vehicleId: v.id("vehicles"),
     productId: v.id("products"),
+    detailingRecordId: v.optional(v.id("detailingRecords")),
     date: v.string(),
+    quantity: v.optional(v.number()),
     notes: v.optional(v.string()),
     createdAt: v.string(),
-  }).index("by_vehicleId", ["vehicleId"]),
+  })
+    .index("by_vehicleId", ["vehicleId"])
+    .index("by_productId", ["productId"])
+    .index("by_date", ["date"]),
 
   // Vehicle condition assessments
   conditionAssessments: defineTable({
@@ -56,6 +94,7 @@ export default defineSchema({
     interiorScore: v.number(),
     notes: v.optional(v.string()),
     createdAt: v.string(),
+    assessedBy: v.optional(v.string()),
     imageUrls: v.optional(v.array(v.string())),
     aiAnalysisResults: v.optional(
       v.object({
@@ -64,7 +103,9 @@ export default defineSchema({
         confidenceScore: v.number(),
       }),
     ),
-  }).index("by_vehicleId", ["vehicleId"]),
+  })
+    .index("by_vehicleId", ["vehicleId"])
+    .index("by_date", ["date"]),
 
   // Knowledge base embeddings for vector search
   knowledgeEmbeddings: defineTable({
@@ -86,9 +127,13 @@ export default defineSchema({
     embeddingId: v.id("knowledgeEmbeddings"),
     createdAt: v.string(),
     updatedAt: v.string(),
+    author: v.optional(v.string()),
+    source: v.optional(v.string()),
+    verified: v.optional(v.boolean()),
   })
     .index("by_embedding", ["embeddingId"])
-    .index("by_category", ["category"]),
+    .index("by_category", ["category"])
+    .index("by_title", ["title"]),
 
   // Product embeddings for vector search
   productEmbeddings: defineTable({
@@ -145,7 +190,266 @@ export default defineSchema({
     embeddingId: v.id("userQueryEmbeddings"),
     timestamp: v.string(),
     responseQuality: v.optional(v.number()), // User feedback on response quality
+    responseTime: v.optional(v.number()), // Time taken to respond in ms
   })
     .index("by_embedding", ["embeddingId"])
-    .index("by_thread", ["threadId"]),
+    .index("by_thread", ["threadId"])
+    .index("by_userId", ["userId"]),
+
+  // NEW TABLES
+
+  // Appointments table
+  appointments: defineTable({
+    customerId: v.string(),
+    vehicleId: v.optional(v.id("vehicles")),
+    staffId: v.optional(v.string()),
+    date: v.string(),
+    startTime: v.string(),
+    endTime: v.string(),
+    serviceType: v.string(),
+    status: v.string(), // "scheduled", "confirmed", "completed", "cancelled", "no-show"
+    price: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+    reminderSent: v.optional(v.boolean()),
+    followupSent: v.optional(v.boolean()),
+  })
+    .index("by_customerId", ["customerId"])
+    .index("by_staffId", ["staffId"])
+    .index("by_date", ["date"])
+    .index("by_status", ["status"])
+    .index("by_date_status", ["date", "status"]),
+
+  // Staff table
+  staff: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    role: v.string(), // "manager", "senior_detailer", "detailer", "apprentice"
+    specialties: v.array(v.string()),
+    hireDate: v.string(),
+    status: v.string(), // "active", "inactive", "on_leave"
+    certifications: v.optional(v.array(v.string())),
+    schedule: v.optional(v.any()), // Weekly schedule
+    hourlyRate: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_email", ["email"])
+    .index("by_role", ["role"])
+    .index("by_status", ["status"]),
+
+  // Staff availability
+  staffAvailability: defineTable({
+    staffId: v.string(),
+    date: v.string(),
+    startTime: v.string(),
+    endTime: v.string(),
+    isAvailable: v.boolean(),
+    reason: v.optional(v.string()), // Reason if not available
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_staffId", ["staffId"])
+    .index("by_date", ["date"])
+    .index("by_staffId_date", ["staffId", "date"]),
+
+  // Staff performance
+  staffPerformance: defineTable({
+    staffId: v.string(),
+    period: v.string(), // "2025-04" (YYYY-MM)
+    servicesCompleted: v.number(),
+    revenue: v.number(),
+    customerRating: v.optional(v.number()),
+    efficiency: v.optional(v.number()), // Percentage
+    upsellRate: v.optional(v.number()), // Percentage
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_staffId", ["staffId"])
+    .index("by_period", ["period"])
+    .index("by_staffId_period", ["staffId", "period"]),
+
+  // Inventory transactions
+  inventoryTransactions: defineTable({
+    productId: v.id("products"),
+    type: v.string(), // "purchase", "use", "adjustment", "return", "write-off"
+    quantity: v.number(), // Positive for additions, negative for removals
+    date: v.string(),
+    staffId: v.optional(v.string()),
+    appointmentId: v.optional(v.id("appointments")),
+    cost: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+  })
+    .index("by_productId", ["productId"])
+    .index("by_date", ["date"])
+    .index("by_type", ["type"]),
+
+  // Suppliers
+  suppliers: defineTable({
+    name: v.string(),
+    contactName: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    website: v.optional(v.string()),
+    products: v.optional(v.array(v.id("products"))),
+    terms: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  }).index("by_name", ["name"]),
+
+  // Purchase orders
+  purchaseOrders: defineTable({
+    supplierId: v.id("suppliers"),
+    orderDate: v.string(),
+    status: v.string(), // "draft", "submitted", "received", "cancelled"
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        quantity: v.number(),
+        unitPrice: v.number(),
+      }),
+    ),
+    totalAmount: v.number(),
+    expectedDelivery: v.optional(v.string()),
+    actualDelivery: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_supplierId", ["supplierId"])
+    .index("by_status", ["status"])
+    .index("by_orderDate", ["orderDate"]),
+
+  // Customer feedback
+  customerFeedback: defineTable({
+    customerId: v.string(),
+    appointmentId: v.id("appointments"),
+    serviceRating: v.number(), // 1-5
+    staffRating: v.optional(v.number()), // 1-5
+    comments: v.optional(v.string()),
+    followupStatus: v.optional(v.string()), // "pending", "contacted", "resolved"
+    staffResponse: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_customerId", ["customerId"])
+    .index("by_appointmentId", ["appointmentId"]),
+
+  // Marketing campaigns
+  marketingCampaigns: defineTable({
+    name: v.string(),
+    type: v.string(), // "email", "social", "local", "referral", "promotion"
+    startDate: v.string(),
+    endDate: v.optional(v.string()),
+    status: v.string(), // "planned", "active", "completed", "cancelled"
+    budget: v.optional(v.number()),
+    target: v.optional(v.any()), // Target audience
+    content: v.optional(v.any()), // Campaign content
+    metrics: v.optional(
+      v.object({
+        impressions: v.optional(v.number()),
+        clicks: v.optional(v.number()),
+        conversions: v.optional(v.number()),
+        revenue: v.optional(v.number()),
+      }),
+    ),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_status", ["status"])
+    .index("by_type", ["type"]),
+
+  // Service packages
+  servicePackages: defineTable({
+    name: v.string(),
+    description: v.string(),
+    category: v.string(), // "basic", "standard", "premium", "custom"
+    services: v.array(v.string()),
+    price: v.number(),
+    duration: v.number(), // In minutes
+    active: v.boolean(),
+    popularityRank: v.optional(v.number()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_category", ["category"])
+    .index("by_active", ["active"]),
+
+  // Business metrics
+  businessMetrics: defineTable({
+    date: v.string(), // YYYY-MM-DD for daily, YYYY-MM for monthly
+    period: v.string(), // "day", "month", "quarter", "year"
+    revenue: v.number(),
+    expenses: v.optional(v.number()),
+    profit: v.optional(v.number()),
+    appointmentsCount: v.number(),
+    servicesCount: v.number(),
+    newCustomersCount: v.optional(v.number()),
+    returningCustomersCount: v.optional(v.number()),
+    averageServiceValue: v.optional(v.number()),
+    productsSold: v.optional(v.number()),
+    productRevenue: v.optional(v.number()),
+    staffHours: v.optional(v.number()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_date", ["date"])
+    .index("by_period", ["period"]),
+
+  // Promotions and discounts
+  promotions: defineTable({
+    code: v.string(),
+    description: v.string(),
+    type: v.string(), // "percentage", "fixed", "free_service", "bundle"
+    value: v.number(), // Percentage or fixed amount
+    minPurchase: v.optional(v.number()),
+    applicableServices: v.optional(v.array(v.string())),
+    startDate: v.string(),
+    endDate: v.optional(v.string()),
+    usageLimit: v.optional(v.number()),
+    usageCount: v.number(),
+    active: v.boolean(),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_code", ["code"])
+    .index("by_active", ["active"]),
+
+  // Customer loyalty
+  customerLoyalty: defineTable({
+    customerId: v.string(),
+    points: v.number(),
+    tier: v.string(), // "bronze", "silver", "gold", "platinum"
+    pointsHistory: v.array(
+      v.object({
+        date: v.string(),
+        amount: v.number(),
+        reason: v.string(),
+        appointmentId: v.optional(v.id("appointments")),
+      }),
+    ),
+    rewards: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          name: v.string(),
+          cost: v.number(),
+          redeemed: v.boolean(),
+          redeemedDate: v.optional(v.string()),
+        }),
+      ),
+    ),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  }).index("by_customerId", ["customerId"]),
 })
