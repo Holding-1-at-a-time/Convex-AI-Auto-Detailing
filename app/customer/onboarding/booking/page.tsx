@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { useQuery, useMutation } from "convex/react"
+import { useQuery, useMutation, useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -29,6 +29,7 @@ export default function CustomerBookingSetup() {
 
   const completeOnboarding = useMutation(api.customerProfiles.completeOnboarding)
   const createAppointment = useMutation(api.appointments.createAppointment)
+  const sendNotification = useAction(api.notifications.sendAppointmentConfirmation)
 
   // Get availability for the selected date and service
   const availability = useQuery(
@@ -72,7 +73,7 @@ export default function CustomerBookingSetup() {
       const vehicleId = vehicles.length > 0 ? vehicles[0]._id : undefined
 
       // Create the appointment
-      await createAppointment({
+      const appointmentId = await createAppointment({
         customerId: userDetails._id,
         vehicleId,
         date: format(selectedDate, "yyyy-MM-dd"),
@@ -80,6 +81,12 @@ export default function CustomerBookingSetup() {
         endTime: timeSlot.endTime,
         serviceType: selectedService,
         notes: "Booked during onboarding",
+      })
+
+      // Send confirmation notification
+      await sendNotification({
+        appointmentId: appointmentId,
+        type: "confirmation",
       })
 
       // Mark onboarding as completed

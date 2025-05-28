@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { useQuery } from "convex/react"
+import { useQuery, useAction } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,35 @@ export default function CustomerServiceExploration() {
   const userDetails = useQuery(api.users.getUserByClerkId, user?.id ? { clerkId: user.id } : "skip")
   const servicePackages = useQuery(api.services.getAllServicePackages, { activeOnly: true })
 
+  // Add state for semantic search
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<any[]>([])
+
+  // Add semantic search action
+  const searchServices = useAction(api.embeddings.searchKnowledgeBase)
+
+  // Add search handler
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const results = await searchServices({
+        query,
+        category: "service",
+        limit: 10,
+      })
+      setSearchResults(results)
+    } catch (error) {
+      console.error("Search error:", error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
   // Loading state
   if (!isUserLoaded || userDetails === undefined || servicePackages === undefined) {
     return (
@@ -31,17 +60,20 @@ export default function CustomerServiceExploration() {
     )
   }
 
-  // Filter services based on search query and active tab
-  const filteredServices = servicePackages.filter((service) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Update the filtered services logic
+  const filteredServices =
+    searchQuery && searchResults.length > 0
+      ? servicePackages.filter((service) => searchResults.some((result) => result.title === service.name))
+      : servicePackages.filter((service) => {
+          const matchesSearch =
+            searchQuery === "" ||
+            service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            service.description.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesCategory = activeTab === "all" || service.category === activeTab
+          const matchesCategory = activeTab === "all" || service.category === activeTab
 
-    return matchesSearch && matchesCategory
-  })
+          return matchesSearch && matchesCategory
+        })
 
   // Get unique categories
   const categories = Array.from(new Set(servicePackages.map((service) => service.category)))
@@ -57,7 +89,10 @@ export default function CustomerServiceExploration() {
             placeholder="Search services..."
             className="pl-10"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              handleSearch(e.target.value)
+            }}
           />
         </div>
       </div>
