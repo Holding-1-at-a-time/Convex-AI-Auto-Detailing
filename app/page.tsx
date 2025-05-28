@@ -18,7 +18,7 @@ export default function SplashPage() {
   const [useMainScene, setUseMainScene] = useState(true)
 
   // Try to use the duck model first
-  const carModelUrl = "/assets/3d/duck.glb"
+  const carModelUrl = "assets/free_bmw_m3_e30.glb"
 
   const handleProgress = (progress: number) => {
     setLoadingProgress(progress)

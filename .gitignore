@@ -18,6 +18,7 @@ yarn-error.log*
 
 # env files
 .env*
+.env.local
 
 # vercel
 .vercel
@@ -26,3 +27,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .early.coverage
+# Sentry Config File
+.env.sentry-build-plugin
+
+# jest
+.config.js
+jest.config.ts
+
+
+
+certificates

@@ -4,9 +4,11 @@ import type React from "react"
 
 import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader"
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+
 
 interface UseThreeSceneProps {
   containerRef: React.RefObject<HTMLDivElement>
@@ -30,7 +32,7 @@ export function useThreeScene({ containerRef, modelUrl, onProgress, onLoaded }: 
 
     // Initialize scene
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color("#f5f5f7")
+    scene.background = new THREE.Color("#00AE98")
     sceneRef.current = scene
 
     // Initialize camera
