@@ -1,120 +1,98 @@
-"use server"
+import { sendBookingConfirmation, type BookingEmailData } from "@/lib/email-service"
+import { db } from "@/lib/db"
+import { getBusinessById } from "@/lib/db/businesses"
+import { getBundleById } from "@/lib/db/bundles"
+import { getCustomerByEmail } from "@/lib/db/customers"
+import { type NewBooking, bookings } from "@/lib/db/schema"
+import { revalidatePath } from "next/cache"
+import { z } from "zod"
 
-import { api } from "@/convex/_generated/api"
-import { fetchMutation, fetchQuery } from "convex/nextjs"
-import { auth } from "@clerk/nextjs/server"
-import type { Id } from "@/convex/_generated/dataModel"
+const bookingSchema = z.object({
+  name: z.string().min(3),
+  email: z.string().email(),
+  phone: z.string().min(10),
+  date: z.string(),
+  time: z.string(),
+  bundleId: z.string(),
+  businessId: z.string(),
+})
 
-export type BookBundleState = {
-  success?: boolean
-  error?: string
-  appointmentId?: string
-  bundleId?: string
-}
+export async function bookBundle(formData: FormData) {
+  "use server"
 
-export async function bookBundle(prevState: BookBundleState | null, formData: FormData): Promise<BookBundleState> {
-  try {
-    // Get authenticated user
-    const { userId } = auth()
-    if (!userId) {
-      return { error: "You must be signed in to book a bundle" }
+  const values = Object.fromEntries(formData.entries())
+  console.log(values)
+
+  const { name, email, phone, date, time, bundleId, businessId } = bookingSchema.parse(values)
+
+  const business = await getBusinessById(businessId)
+  const bundle = await getBundleById(bundleId)
+
+  if (!business || !bundle) {
+    return {
+      error: "Business or bundle not found",
     }
+  }
 
-    // Extract form data
-    const bundleId = formData.get("bundleId") as string
-    const date = formData.get("date") as string
-    const time = formData.get("time") as string
-    const name = formData.get("name") as string
-    const email = formData.get("email") as string
-    const phone = formData.get("phone") as string
-    const vehicleId = formData.get("vehicleId") as string
-    const notes = formData.get("notes") as string
+  let customer = await getCustomerByEmail(email)
 
-    // Validate required fields
-    if (!bundleId || !date || !time || !name || !email) {
-      return { error: "Please fill in all required fields" }
-    }
-
-    // Validate date is not in the past
-    const selectedDate = new Date(date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    if (selectedDate < today) {
-      return { error: "Please select a future date" }
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return { error: "Please enter a valid email address" }
-    }
-
-    // Validate phone format if provided
-    if (phone) {
-      const phoneRegex = /^[\d\s\-+$$$$]+$/
-      if (!phoneRegex.test(phone) || phone.replace(/\D/g, "").length < 10) {
-        return { error: "Please enter a valid phone number" }
-      }
-    }
-
-    // Check availability one more time
-    const availability = await fetchQuery(api.bundleBookings.getBundleAvailability, {
-      bundleId: bundleId as Id<"serviceBundles">,
-      date,
-    })
-
-    const isSlotAvailable = availability.availableSlots.some((slot) => slot.startTime === time && slot.available)
-
-    if (!isSlotAvailable) {
-      return { error: "This time slot is no longer available. Please select another time." }
-    }
-
-    // Create the booking
-    const result = await fetchMutation(api.bundleBookings.createBundleBooking, {
-      bundleId: bundleId as Id<"serviceBundles">,
-      customerId: userId,
-      date,
-      startTime: time,
-      customerInfo: {
+  if (!customer) {
+    customer = await db
+      .insert(customers)
+      .values({
         name,
         email,
-        phone: phone || undefined,
-      },
-      vehicleId: vehicleId ? (vehicleId as Id<"vehicles">) : undefined,
-      notes: notes || undefined,
-    })
+        phone,
+      })
+      .returning()
+      .then((rows) => rows[0])
+  }
 
-    if (result.success) {
-      return {
-        success: true,
-        appointmentId: result.appointmentId,
-        bundleId: result.bundleId,
-      }
-    } else {
-      return { error: "Failed to create booking. Please try again." }
+  if (!customer) {
+    return {
+      error: "Failed to create customer",
     }
-  } catch (error) {
-    console.error("Bundle booking error:", error)
+  }
 
-    // Handle specific error messages
-    if (error instanceof Error) {
-      if (error.message.includes("expired")) {
-        return { error: "This bundle has expired and is no longer available." }
-      }
-      if (error.message.includes("sold out")) {
-        return { error: "This bundle is sold out." }
-      }
-      if (error.message.includes("not yet available")) {
-        return { error: "This bundle is not yet available for booking." }
-      }
-      if (error.message.includes("not available")) {
-        return { error: "This time slot is not available. Please select another time." }
-      }
-
-      return { error: error.message }
+  try {
+    const booking: NewBooking = {
+      customerId: customer.id,
+      businessId: business.id,
+      bundleId: bundle.id,
+      date,
+      time,
+      total: bundle.discountedPrice,
     }
 
-    return { error: "An unexpected error occurred. Please try again." }
+    const [newBooking] = await db.insert(bookings).values(booking).returning()
+
+    revalidatePath("/")
+    revalidatePath("/bookings")
+
+    // Send confirmation email
+    if (newBooking) {
+      const emailData: BookingEmailData = {
+        customerEmail: email,
+        customerName: name,
+        bundleName: bundle.name,
+        bookingDate: date,
+        bookingTime: time,
+        businessName: business?.name || "Auto Detailing Service",
+        totalPrice: bundle.discountedPrice,
+        bookingId: newBooking.id,
+      }
+
+      await sendBookingConfirmation(emailData)
+    }
+
+    return {
+      success: true,
+      bookingId: newBooking.id,
+    }
+  } catch (e: any) {
+    console.log(e)
+    return {
+      error: e.message,
+    }
   }
 }
