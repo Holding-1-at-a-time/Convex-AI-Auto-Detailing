@@ -238,3 +238,32 @@ export const listBusinessProfiles = query({
     }
   },
 })
+
+// Complete business onboarding
+export const completeOnboarding = mutation({
+  args: {
+    profileId: v.id("businessProfiles"),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db.get(args.profileId)
+    if (!profile) {
+      throw new Error("Business profile not found")
+    }
+
+    // Verify user is authorized
+    const { user } = await verifyUserRole(ctx, ["business", "admin"])
+
+    // Only the owner or an admin can complete onboarding
+    if (user.role !== "admin" && profile.userId !== user.clerkId) {
+      throw new Error("Unauthorized: You can only complete your own business onboarding")
+    }
+
+    // Update the profile
+    await ctx.db.patch(args.profileId, {
+      onboardingCompleted: true,
+      updatedAt: new Date().toISOString(),
+    })
+
+    return { success: true }
+  },
+})

@@ -1,15 +1,14 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
-import { verifyUserRole } from "./utils/auth"
 
-// Create or update user from Clerk data
+// Create or update a user in Convex
 export const createOrUpdateUser = mutation({
   args: {
     clerkId: v.string(),
     email: v.string(),
-    firstName: v.string(),
-    lastName: v.string(),
-    role: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    role: v.string(), // "customer" or "business"
   },
   handler: async (ctx, args) => {
     // Check if user already exists
@@ -18,36 +17,32 @@ export const createOrUpdateUser = mutation({
       .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
       .first()
 
-    const userData = {
-      clerkId: args.clerkId,
-      email: args.email,
-      name: `${args.firstName} ${args.lastName}`.trim(),
-      firstName: args.firstName,
-      lastName: args.lastName,
-      role: args.role,
-      updatedAt: new Date().toISOString(),
-    }
+    const name = `${args.firstName || ""} ${args.lastName || ""}`.trim()
 
     if (existingUser) {
       // Update existing user
-      await ctx.db.patch(existingUser._id, userData)
-      return existingUser._id
+      return await ctx.db.patch(existingUser._id, {
+        name: name || existingUser.name,
+        role: args.role,
+        lastLogin: new Date().toISOString(),
+      })
     } else {
       // Create new user
-      const userId = await ctx.db.insert("users", {
-        ...userData,
+      return await ctx.db.insert("users", {
+        name: name,
+        email: args.email,
+        role: args.role,
+        clerkId: args.clerkId,
         createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
       })
-      return userId
     }
   },
 })
 
 // Get user by Clerk ID
 export const getUserByClerkId = query({
-  args: {
-    clerkId: v.string(),
-  },
+  args: { clerkId: v.string() },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
@@ -58,63 +53,34 @@ export const getUserByClerkId = query({
   },
 })
 
-// Get user profile with additional data
-export const getUserProfile = query({
-  args: {
-    userId: v.id("users"),
-  },
+// Get current user role
+export const getCurrentUserRole = query({
+  args: { clerkId: v.string() },
   handler: async (ctx, args) => {
-    const user = await ctx.db.get(args.userId)
-    if (!user) return null
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .first()
 
-    // Get role-specific profile data
-    if (user.role === "business") {
-      const businessProfile = await ctx.db
-        .query("businessProfiles")
-        .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
-        .first()
-
-      return {
-        ...user,
-        businessProfile,
-      }
-    } else if (user.role === "customer") {
-      const customerProfile = await ctx.db
-        .query("customerProfiles")
-        .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
-        .first()
-
-      const vehicles = await ctx.db
-        .query("vehicles")
-        .withIndex("by_userId", (q) => q.eq("userId", user.clerkId))
-        .collect()
-
-      return {
-        ...user,
-        customerProfile,
-        vehicles,
-      }
-    }
-
-    return user
+    return user?.role || null
   },
 })
 
-// Update user role
-export const updateUserRole = mutation({
-  args: {
-    userId: v.id("users"),
-    role: v.string(),
-  },
+// Update user login status
+export const updateUserLoginStatus = mutation({
+  args: { clerkId: v.string() },
   handler: async (ctx, args) => {
-    // Verify user is authorized
-    const { user } = await verifyUserRole(ctx, ["admin"])
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .first()
 
-    await ctx.db.patch(args.userId, {
-      role: args.role,
-      updatedAt: new Date().toISOString(),
-    })
+    if (user) {
+      return await ctx.db.patch(user._id, {
+        lastLogin: new Date().toISOString(),
+      })
+    }
 
-    return args.userId
+    return null
   },
 })
