@@ -3,200 +3,138 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
-import { useQuery, useAction } from "convex/react"
+import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LoadingSpinner } from "@/components/loading-spinner"
-import { Search, Clock, DollarSign, Star, Info } from "lucide-react"
+import { redirect } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 
-export default function CustomerServiceExploration() {
+export default function CustomerServicesPage() {
   const router = useRouter()
   const { user, isLoaded: isUserLoaded } = useUser()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedServices, setSelectedServices] = useState([])
 
   const userDetails = useQuery(api.users.getUserByClerkId, user?.id ? { clerkId: user.id } : "skip")
-  const servicePackages = useQuery(api.services.getAllServicePackages, { activeOnly: true })
+  const customerProfile = useQuery(
+    api.customerProfiles.getCustomerProfileByUserId,
+    userDetails?._id ? { userId: userDetails._id } : "skip",
+  )
+  const completeOnboarding = useMutation(api.customerProfiles.completeOnboarding)
 
-  // Add state for semantic search
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<any[]>([])
-
-  // Add semantic search action
-  const searchServices = useAction(api.embeddings.searchKnowledgeBase)
-
-  // Add search handler
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([])
-      return
-    }
-
-    setIsSearching(true)
-    try {
-      const results = await searchServices({
-        query,
-        category: "service",
-        limit: 10,
-      })
-      setSearchResults(results)
-    } catch (error) {
-      console.error("Search error:", error)
-    } finally {
-      setIsSearching(false)
-    }
-  }
+  // Get all available services
+  const services = useQuery(api.services.listAllServices) || []
 
   // Loading state
-  if (!isUserLoaded || userDetails === undefined || servicePackages === undefined) {
+  if (!isUserLoaded || userDetails === undefined || customerProfile === undefined) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
-  // Update the filtered services logic
-  const filteredServices =
-    searchQuery && searchResults.length > 0
-      ? servicePackages.filter((service) => searchResults.some((result) => result.title === service.name))
-      : servicePackages.filter((service) => {
-          const matchesSearch =
-            searchQuery === "" ||
-            service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            service.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Redirect if not logged in
+  if (!user) {
+    redirect("/sign-in")
+    return null
+  }
 
-          const matchesCategory = activeTab === "all" || service.category === activeTab
+  // Redirect if not a customer
+  if (userDetails?.role !== "customer") {
+    redirect("/role-selection")
+    return null
+  }
 
-          return matchesSearch && matchesCategory
-        })
+  // Redirect if profile not created
+  if (!customerProfile) {
+    redirect("/customer/onboarding/profile")
+    return null
+  }
 
-  // Get unique categories
-  const categories = Array.from(new Set(servicePackages.map((service) => service.category)))
+  // Redirect if vehicles not added
+  if (!customerProfile.vehicles || customerProfile.vehicles.length === 0) {
+    redirect("/customer/onboarding/vehicles")
+    return null
+  }
+
+  // Handle service selection
+  const handleServiceToggle = (serviceId) => {
+    if (selectedServices.includes(serviceId)) {
+      setSelectedServices(selectedServices.filter((id) => id !== serviceId))
+    } else {
+      setSelectedServices([...selectedServices, serviceId])
+    }
+  }
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // Complete onboarding
+      await completeOnboarding({
+        userId: userDetails.clerkId,
+      })
+
+      // Update Clerk metadata
+      await user.update({
+        publicMetadata: {
+          ...user.publicMetadata,
+          onboardingComplete: true,
+          preferredServices: selectedServices,
+        },
+      })
+
+      // Redirect to dashboard
+      router.push("/customer/dashboard")
+    } catch (error) {
+      console.error("Error completing onboarding:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    <div>
-      <h2 className="mb-6 text-2xl font-bold">Explore Our Services</h2>
-
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search services..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value)
-              handleSearch(e.target.value)
-            }}
-          />
-        </div>
-      </div>
-
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Services</TabsTrigger>
-          {categories.map((category) => (
-            <TabsTrigger key={category} value={category}>
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        <TabsContent value="all" className="mt-0">
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredServices.map((service) => (
-              <ServiceCard key={service._id} service={service} />
-            ))}
-          </div>
-        </TabsContent>
-
-        {categories.map((category) => (
-          <TabsContent key={category} value={category} className="mt-0">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Select Your Preferred Services</CardTitle>
+          <CardDescription>Choose the detailing services you're interested in</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              {filteredServices.map((service) => (
-                <ServiceCard key={service._id} service={service} />
+              {services.map((service) => (
+                <div key={service._id} className="flex items-start space-x-3 rounded-lg border p-4">
+                  <Checkbox
+                    id={service._id}
+                    checked={selectedServices.includes(service._id)}
+                    onCheckedChange={() => handleServiceToggle(service._id)}
+                  />
+                  <div>
+                    <Label htmlFor={service._id} className="font-medium">
+                      {service.name}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">{service.description}</p>
+                    <p className="mt-1 text-sm font-medium">${service.price.toFixed(2)}</p>
+                  </div>
+                </div>
               ))}
             </div>
-          </TabsContent>
-        ))}
-      </Tabs>
 
-      <div className="mt-8 flex justify-between">
-        <Button variant="outline" onClick={() => router.push("/customer/onboarding/vehicles")}>
-          Back
-        </Button>
-        <Button onClick={() => router.push("/customer/onboarding/booking")}>Continue</Button>
-      </div>
+            <div className="mt-6">
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Complete Onboarding"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
-}
-
-function ServiceCard({ service }) {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between">
-          <div>
-            <CardTitle>{service.name}</CardTitle>
-            <CardDescription>{service.category.charAt(0).toUpperCase() + service.category.slice(1)}</CardDescription>
-          </div>
-          <Badge variant={getBadgeVariant(service.category)}>{service.category}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{service.description}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Clock className="mr-1 h-4 w-4" />
-            {formatDuration(service.duration)}
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <DollarSign className="mr-1 h-4 w-4" />${service.price.toFixed(2)}
-          </div>
-          {service.popularityRank && service.popularityRank <= 3 && (
-            <div className="flex items-center text-sm text-amber-500">
-              <Star className="mr-1 h-4 w-4" />
-              Popular
-            </div>
-          )}
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full">
-          <Info className="mr-2 h-4 w-4" />
-          View Details
-        </Button>
-      </CardFooter>
-    </Card>
-  )
-}
-
-// Helper functions
-function getBadgeVariant(category) {
-  switch (category) {
-    case "basic":
-      return "secondary"
-    case "standard":
-      return "default"
-    case "premium":
-      return "destructive"
-    case "custom":
-      return "outline"
-    default:
-      return "default"
-  }
-}
-
-function formatDuration(minutes) {
-  if (minutes < 60) {
-    return `${minutes} min`
-  }
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours} hr ${remainingMinutes} min` : `${hours} hr`
 }
