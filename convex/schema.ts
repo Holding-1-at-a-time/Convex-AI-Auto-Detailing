@@ -262,4 +262,165 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_isActive", ["isActive"])
     .index("by_businessId_isActive", ["businessId", "isActive"]),
+
+  // Email logs for tracking all email communications
+  emailLogs: defineTable({
+    appointmentId: v.optional(v.id("appointments")),
+    bundleBookingId: v.optional(v.string()),
+    recipientEmail: v.string(),
+    recipientName: v.optional(v.string()),
+    emailType: v.union(
+      v.literal("confirmation"),
+      v.literal("reminder"),
+      v.literal("cancellation"),
+      v.literal("rescheduling"),
+      v.literal("feedback_request"),
+      v.literal("marketing"),
+      v.literal("system_notification"),
+    ),
+    subject: v.string(),
+    content: v.string(),
+    status: v.union(
+      v.literal("sent"),
+      v.literal("delivered"),
+      v.literal("opened"),
+      v.literal("clicked"),
+      v.literal("failed"),
+      v.literal("bounced"),
+    ),
+    sentAt: v.string(),
+    deliveredAt: v.optional(v.string()),
+    openedAt: v.optional(v.string()),
+    clickedAt: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+  })
+    .index("by_appointmentId", ["appointmentId"])
+    .index("by_bundleBookingId", ["bundleBookingId"])
+    .index("by_recipientEmail", ["recipientEmail"])
+    .index("by_emailType", ["emailType"])
+    .index("by_status", ["status"])
+    .index("by_sentAt", ["sentAt"]),
+
+  // Service bundles for package deals
+  serviceBundles: defineTable({
+    businessId: v.id("businessProfiles"),
+    name: v.string(),
+    description: v.string(),
+    services: v.array(v.id("servicePackages")), // Array of service IDs
+    originalPrice: v.number(), // Sum of individual service prices
+    bundlePrice: v.number(), // Discounted bundle price
+    savings: v.number(), // Amount saved
+    duration: v.number(), // Total duration in minutes
+    isActive: v.boolean(),
+    validFrom: v.optional(v.string()),
+    validUntil: v.optional(v.string()),
+    maxRedemptions: v.optional(v.number()), // Max times this bundle can be purchased
+    currentRedemptions: v.number(),
+    imageUrl: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_businessId", ["businessId"])
+    .index("by_isActive", ["isActive"])
+    .index("by_businessId_isActive", ["businessId", "isActive"])
+    .index("by_name", ["name"])
+    .index("by_createdAt", ["createdAt"]),
+
+  // Bundle bookings for tracking bundle purchases and usage
+  bundleBookings: defineTable({
+    customerId: v.string(),
+    bundleId: v.id("serviceBundles"),
+    businessId: v.id("businessProfiles"),
+    purchaseDate: v.string(),
+    totalPrice: v.number(),
+    servicesIncluded: v.array(
+      v.object({
+        serviceId: v.id("servicePackages"),
+        serviceName: v.string(),
+        isRedeemed: v.boolean(),
+        redeemedAt: v.optional(v.string()),
+        appointmentId: v.optional(v.id("appointments")),
+      }),
+    ),
+    status: v.union(
+      v.literal("active"),
+      v.literal("partially_used"),
+      v.literal("fully_used"),
+      v.literal("expired"),
+      v.literal("cancelled"),
+    ),
+    expiryDate: v.optional(v.string()),
+    refundAmount: v.optional(v.number()),
+    refundReason: v.optional(v.string()),
+    refundedAt: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_customerId", ["customerId"])
+    .index("by_bundleId", ["bundleId"])
+    .index("by_businessId", ["businessId"])
+    .index("by_status", ["status"])
+    .index("by_customerId_status", ["customerId", "status"])
+    .index("by_businessId_status", ["businessId", "status"])
+    .index("by_purchaseDate", ["purchaseDate"])
+    .index("by_expiryDate", ["expiryDate"]),
+
+  // Bundle service records for tracking individual service redemptions
+  bundleServiceRecords: defineTable({
+    bundleBookingId: v.id("bundleBookings"),
+    serviceId: v.id("servicePackages"),
+    customerId: v.string(),
+    businessId: v.id("businessProfiles"),
+    appointmentId: v.optional(v.id("appointments")),
+    scheduledDate: v.optional(v.string()),
+    scheduledTime: v.optional(v.string()),
+    status: v.union(
+      v.literal("available"),
+      v.literal("scheduled"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+      v.literal("expired"),
+    ),
+    redeemedAt: v.optional(v.string()),
+    completedAt: v.optional(v.string()),
+    cancelledAt: v.optional(v.string()),
+    cancellationReason: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_bundleBookingId", ["bundleBookingId"])
+    .index("by_serviceId", ["serviceId"])
+    .index("by_customerId", ["customerId"])
+    .index("by_businessId", ["businessId"])
+    .index("by_appointmentId", ["appointmentId"])
+    .index("by_status", ["status"])
+    .index("by_customerId_status", ["customerId", "status"])
+    .index("by_businessId_status", ["businessId", "status"])
+    .index("by_scheduledDate", ["scheduledDate"]),
+
+  // Cancellation policies for businesses
+  cancellationPolicies: defineTable({
+    businessId: v.id("businessProfiles"),
+    name: v.string(),
+    description: v.string(),
+    rules: v.array(
+      v.object({
+        hoursBeforeAppointment: v.number(),
+        refundPercentage: v.number(),
+        description: v.string(),
+      }),
+    ),
+    isDefault: v.boolean(),
+    isActive: v.boolean(),
+    createdAt: v.string(),
+    updatedAt: v.optional(v.string()),
+  })
+    .index("by_businessId", ["businessId"])
+    .index("by_isDefault", ["isDefault"])
+    .index("by_isActive", ["isActive"])
+    .index("by_businessId_isActive", ["businessId", "isActive"]),
 })
