@@ -2,197 +2,310 @@
 
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Clock, User, DollarSign, Filter } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Calendar, Clock, DollarSign, Users, Mail, AlertTriangle } from "lucide-react"
 import { useState } from "react"
-import { format } from "date-fns"
+import { BookingDetailsModal } from "./booking-details-modal"
+import { EmailLogsModal } from "./email-logs-modal"
 
 export default function AdminBookingsPage() {
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [dateFilter, setDateFilter] = useState<string>("")
-  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [selectedBooking, setSelectedBooking] = useState<string | null>(null)
+  const [showEmailLogs, setShowEmailLogs] = useState(false)
 
-  const bookings = useQuery(api.bundleBookings.getAllBundleBookings, {
-    status: statusFilter === "all" ? undefined : statusFilter,
-    date: dateFilter || undefined,
-    searchTerm: searchTerm || undefined,
+  // Get all appointments
+  const allAppointments = useQuery(api.appointments.getAllAppointments, {
+    limit: 100,
   })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-100 text-green-800"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "cancelled":
-        return "bg-red-100 text-red-800"
-      case "completed":
-        return "bg-blue-100 text-blue-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+  // Get cancelled appointments
+  const cancelledAppointments = useQuery(api.appointmentCancellation.getCancelledAppointments, {
+    limit: 50,
+  })
+
+  // Get email logs
+  const emailLogs = useQuery(api.emailNotifications.getEmailLogs, {
+    limit: 50,
+  })
+
+  // Calculate statistics
+  const stats = {
+    total: allAppointments?.length || 0,
+    scheduled: allAppointments?.filter((a) => a.status === "scheduled").length || 0,
+    completed: allAppointments?.filter((a) => a.status === "completed").length || 0,
+    cancelled: allAppointments?.filter((a) => a.status === "cancelled").length || 0,
+    revenue: allAppointments?.reduce((sum, a) => sum + (a.price || 0), 0) || 0,
   }
 
-  const totalRevenue = bookings?.reduce((sum, booking) => sum + (booking.price || 0), 0) || 0
-  const confirmedBookings = bookings?.filter((b) => b.status === "confirmed").length || 0
+  const getStatusBadge = (status: string) => {
+    const variants = {
+      scheduled: "default",
+      completed: "secondary",
+      cancelled: "destructive",
+      "in-progress": "outline",
+    } as const
+
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    )
+  }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Booking Management</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Booking Management</h1>
+          <p className="text-muted-foreground">Manage appointments, cancellations, and notifications</p>
+        </div>
         <div className="flex gap-2">
-          <Button variant="outline">Export Data</Button>
-          <Button>Add Booking</Button>
+          <Button onClick={() => setShowEmailLogs(true)} variant="outline">
+            <Mail className="w-4 h-4 mr-2" />
+            Email Logs
+          </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Bookings</p>
-                <p className="text-2xl font-bold">{bookings?.length || 0}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-muted-foreground" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Confirmed</p>
-                <p className="text-2xl font-bold">{confirmedBookings}</p>
-              </div>
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Scheduled</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.scheduled}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-muted-foreground" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.completed}</div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg. Booking Value</p>
-                <p className="text-2xl font-bold">
-                  ${bookings?.length ? (totalRevenue / bookings.length).toFixed(2) : "0.00"}
-                </p>
-              </div>
-              <Clock className="h-8 w-8 text-muted-foreground" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cancelled</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.cancelled}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${stats.revenue.toFixed(2)}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium">Search</label>
-              <Input
-                placeholder="Search by customer name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Date</label>
-              <Input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Booking Management Tabs */}
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="all">All Bookings</TabsTrigger>
+          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+          <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+        </TabsList>
 
-      {/* Bookings List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Bookings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {bookings?.map((booking) => (
-              <div
-                key={booking._id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h4 className="font-medium">{booking.bundleName}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {booking.customerName} • {booking.customerEmail}
-                      </p>
+        <TabsContent value="all" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Appointments</CardTitle>
+              <CardDescription>Complete list of all appointments in the system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allAppointments?.map((appointment) => (
+                  <div
+                    key={appointment._id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => setSelectedBooking(appointment._id)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold">{appointment.serviceType}</h3>
+                        {getStatusBadge(appointment.status)}
+                        {appointment.bundleId && <Badge variant="outline">Bundle</Badge>}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>
+                          {appointment.date} at {appointment.startTime} - {appointment.endTime}
+                        </p>
+                        <p>Customer: {appointment.customerId}</p>
+                        {appointment.price && <p>Price: ${appointment.price}</p>}
+                      </div>
                     </div>
-                    <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(booking.date), "MMM d, yyyy")}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {booking.startTime} - {booking.endTime}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />${booking.price}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    View Details
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Contact Customer
-                  </Button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="scheduled" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Scheduled Appointments</CardTitle>
+              <CardDescription>Upcoming appointments that are confirmed</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allAppointments
+                  ?.filter((a) => a.status === "scheduled")
+                  .map((appointment) => (
+                    <div
+                      key={appointment._id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                      onClick={() => setSelectedBooking(appointment._id)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{appointment.serviceType}</h3>
+                          {appointment.bundleId && <Badge variant="outline">Bundle</Badge>}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <p>
+                            {appointment.date} at {appointment.startTime} - {appointment.endTime}
+                          </p>
+                          <p>Customer: {appointment.customerId}</p>
+                          {appointment.price && <p>Price: ${appointment.price}</p>}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Manage
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cancelled" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Cancelled Appointments</CardTitle>
+              <CardDescription>Appointments that have been cancelled</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {cancelledAppointments?.page?.map((appointment) => (
+                  <div
+                    key={appointment._id}
+                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => setSelectedBooking(appointment._id)}
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold">{appointment.serviceType}</h3>
+                        <Badge variant="destructive">Cancelled</Badge>
+                        {appointment.bundleId && <Badge variant="outline">Bundle</Badge>}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>
+                          {appointment.date} at {appointment.startTime} - {appointment.endTime}
+                        </p>
+                        <p>Customer: {appointment.customerId}</p>
+                        {appointment.cancellationReason && <p>Reason: {appointment.cancellationReason}</p>}
+                        {appointment.cancelledAt && (
+                          <p>Cancelled: {new Date(appointment.cancelledAt).toLocaleDateString()}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="completed" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Completed Appointments</CardTitle>
+              <CardDescription>Successfully completed appointments</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {allAppointments
+                  ?.filter((a) => a.status === "completed")
+                  .map((appointment) => (
+                    <div
+                      key={appointment._id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                      onClick={() => setSelectedBooking(appointment._id)}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{appointment.serviceType}</h3>
+                          <Badge variant="secondary">Completed</Badge>
+                          {appointment.bundleId && <Badge variant="outline">Bundle</Badge>}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <p>
+                            {appointment.date} at {appointment.startTime} - {appointment.endTime}
+                          </p>
+                          <p>Customer: {appointment.customerId}</p>
+                          {appointment.price && <p>Price: ${appointment.price}</p>}
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        View Details
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Modals */}
+      {selectedBooking && (
+        <BookingDetailsModal
+          appointmentId={selectedBooking}
+          open={!!selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+        />
+      )}
+
+      {showEmailLogs && (
+        <EmailLogsModal
+          open={showEmailLogs}
+          onClose={() => setShowEmailLogs(false)}
+          emailLogs={emailLogs?.page || []}
+        />
+      )}
     </div>
   )
 }
