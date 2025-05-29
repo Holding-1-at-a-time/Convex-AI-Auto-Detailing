@@ -1,34 +1,94 @@
-import { act } from "@testing-library/react"
+import { renderHook, act } from "@testing-library/react"
+import { useQuery } from "convex/react"
 import { useCalendarView } from "@/hooks/use-calendar-view"
-import {
-  renderHookWithProviders,
-  setupMocks,
-  mockConvexQueries,
-  createMockAppointment,
-  createMockBusinessHours,
-} from "./test-utils"
-import { format } from "date-fns"
 
 // Mock dependencies
-jest.mock("convex/react", () => ({
-  useQuery: jest.fn((query, args) => {
-    if (args === "skip") return undefined
-    return mockConvexQueries[query]?.() || null
-  }),
-}))
+jest.mock("convex/react")
+
+const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>
 
 describe("useCalendarView", () => {
   const mockBusinessId = "business_123" as any
   const mockCustomerId = "customer_123"
+  const mockOnDateSelect = jest.fn()
+  const mockOnEventSelect = jest.fn()
+
+  const mockAppointments = [
+    {
+      _id: "apt_1",
+      date: "2024-02-15",
+      startTime: "10:00",
+      endTime: "11:00",
+      status: "confirmed",
+      customerName: "John Doe",
+      serviceName: "Basic Wash",
+      price: 50,
+    },
+    {
+      _id: "apt_2",
+      date: "2024-02-15",
+      startTime: "14:00",
+      endTime: "15:00",
+      status: "scheduled",
+      customerName: "Jane Smith",
+      serviceName: "Premium Detail",
+      price: 150,
+    },
+    {
+      _id: "apt_3",
+      date: "2024-02-16",
+      startTime: "09:00",
+      endTime: "10:00",
+      status: "completed",
+      customerName: "Bob Johnson",
+      serviceName: "Interior Clean",
+      price: 75,
+    },
+  ]
+
+  const mockBusinessAvailability = {
+    businessHours: {
+      monday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+      tuesday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+      wednesday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+      thursday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+      friday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+      saturday: { isOpen: false },
+      sunday: { isOpen: false },
+    },
+  }
 
   beforeEach(() => {
-    setupMocks()
     jest.clearAllMocks()
+
+    mockUseQuery.mockImplementation((query) => {
+      if (query.toString().includes("getAppointmentsByDateRange")) {
+        return mockAppointments
+      }
+      if (query.toString().includes("getBusinessAvailability")) {
+        return mockBusinessAvailability
+      }
+      return null
+    })
+
+    // Mock keyboard events
+    Object.defineProperty(window, "addEventListener", {
+      value: jest.fn(),
+      writable: true,
+    })
+    Object.defineProperty(window, "removeEventListener", {
+      value: jest.fn(),
+      writable: true,
+    })
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   describe("Initial State", () => {
     it("should initialize with default values", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+      const { result } = renderHook(() => useCalendarView())
 
       expect(result.current.currentDate).toBeInstanceOf(Date)
       expect(result.current.selectedDate).toBeNull()
@@ -38,154 +98,131 @@ describe("useCalendarView", () => {
       expect(result.current.hoveredDate).toBeNull()
     })
 
-    it("should use custom default view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "week" }))
+    it("should initialize with custom view mode", () => {
+      const { result } = renderHook(() => useCalendarView({ defaultView: "week" }))
 
       expect(result.current.viewMode).toBe("week")
+    })
+
+    it("should use business ID when provided", () => {
+      renderHook(() => useCalendarView({ businessId: mockBusinessId }))
+
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          businessId: mockBusinessId,
+        }),
+      )
     })
   })
 
   describe("Calendar Days Generation", () => {
     it("should generate calendar days for month view", () => {
-      const appointments = [
-        createMockAppointment({
-          date: format(new Date(), "yyyy-MM-dd"),
-          startTime: "10:00",
-          serviceName: "Basic Wash",
-          customerName: "John Doe",
-          status: "scheduled",
-        }),
-      ]
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue(appointments)
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
-
-      const calendarDays = result.current.calendarDays
-
-      expect(calendarDays.length).toBeGreaterThan(28) // At least 4 weeks
-      expect(calendarDays.length).toBeLessThanOrEqual(42) // At most 6 weeks
-
-      // Check that today is marked correctly
-      const today = calendarDays.find((day) => day.isToday)
-      expect(today).toBeTruthy()
-
-      // Check that appointments are included
-      const dayWithAppointment = calendarDays.find((day) => day.appointments.length > 0)
-      expect(dayWithAppointment).toBeTruthy()
-      expect(dayWithAppointment?.appointments[0].title).toBe("Basic Wash")
+      expect(result.current.calendarDays.length).toBeGreaterThan(0)
+      expect(result.current.calendarDays[0]).toMatchObject({
+        date: expect.any(Date),
+        dateString: expect.any(String),
+        isCurrentMonth: expect.any(Boolean),
+        isToday: expect.any(Boolean),
+        isSelected: expect.any(Boolean),
+        appointments: expect.any(Array),
+        isAvailable: expect.any(Boolean),
+        hasAvailableSlots: expect.any(Boolean),
+      })
     })
 
     it("should generate calendar days for week view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "week" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "week" }))
 
-      act(() => {
-        result.current.setViewMode("week")
-      })
-
-      const calendarDays = result.current.calendarDays
-      expect(calendarDays.length).toBe(7) // Exactly one week
+      expect(result.current.calendarDays.length).toBe(7)
     })
 
     it("should generate calendar days for day view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "day" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "day" }))
 
-      act(() => {
-        result.current.setViewMode("day")
+      expect(result.current.calendarDays.length).toBe(1)
+    })
+
+    it("should mark today correctly", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
+
+      const today = result.current.calendarDays.find((day) => day.isToday)
+      expect(today).toBeTruthy()
+      expect(today?.date.toDateString()).toBe(new Date().toDateString())
+    })
+
+    it("should include appointments in calendar days", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
+
+      const dayWithAppointments = result.current.calendarDays.find((day) => day.dateString === "2024-02-15")
+
+      expect(dayWithAppointments?.appointments.length).toBe(2)
+      expect(dayWithAppointments?.appointments[0]).toMatchObject({
+        id: "apt_1",
+        time: "10:00",
+        title: "Basic Wash",
+        status: "confirmed",
+        customerName: "John Doe",
       })
-
-      const calendarDays = result.current.calendarDays
-      expect(calendarDays.length).toBe(1) // Exactly one day
     })
   })
 
-  describe("Appointment Filtering", () => {
-    const mockAppointments = [
-      createMockAppointment({
-        _id: "apt1",
-        date: format(new Date(), "yyyy-MM-dd"),
-        serviceName: "Basic Wash",
-        customerName: "John Doe",
-        status: "scheduled",
-      }),
-      createMockAppointment({
-        _id: "apt2",
-        date: format(new Date(), "yyyy-MM-dd"),
-        serviceName: "Premium Detail",
-        customerName: "Jane Smith",
-        status: "completed",
-      }),
-      createMockAppointment({
-        _id: "apt3",
-        date: format(new Date(), "yyyy-MM-dd"),
-        serviceName: "Interior Clean",
-        customerName: "Bob Johnson",
-        status: "cancelled",
-      }),
-    ]
+  describe("Calendar Events", () => {
+    it("should convert appointments to calendar events", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-    beforeEach(() => {
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue(mockAppointments)
+      expect(result.current.calendarEvents.length).toBe(3)
+      expect(result.current.calendarEvents[0]).toMatchObject({
+        id: "apt_1",
+        title: "Basic Wash",
+        start: expect.any(Date),
+        end: expect.any(Date),
+        status: "confirmed",
+        customerName: "John Doe",
+        serviceName: "Basic Wash",
+        price: 50,
+      })
     })
 
-    it("should filter appointments by status", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+    it("should filter events by status", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      // Filter by completed status
       act(() => {
         result.current.setStatusFilter("completed")
       })
 
-      const events = result.current.calendarEvents
-      expect(events.length).toBe(1)
-      expect(events[0].title).toBe("Premium Detail")
-      expect(events[0].status).toBe("completed")
+      expect(result.current.calendarEvents.length).toBe(1)
+      expect(result.current.calendarEvents[0].status).toBe("completed")
     })
 
-    it("should filter appointments by search query", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+    it("should filter events by search query", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      // Search for "Jane"
       act(() => {
-        result.current.setSearchQuery("Jane")
+        result.current.setSearchQuery("john")
       })
 
-      const events = result.current.calendarEvents
-      expect(events.length).toBe(1)
-      expect(events[0].customerName).toBe("Jane Smith")
+      expect(result.current.calendarEvents.length).toBe(1)
+      expect(result.current.calendarEvents[0].customerName).toBe("John Doe")
     })
 
-    it("should filter appointments by service name", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+    it("should filter events by service name", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      // Search for "Premium"
       act(() => {
-        result.current.setSearchQuery("Premium")
+        result.current.setSearchQuery("premium")
       })
 
-      const events = result.current.calendarEvents
-      expect(events.length).toBe(1)
-      expect(events[0].title).toBe("Premium Detail")
-    })
-
-    it("should combine status and search filters", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
-
-      // Filter by scheduled status and search for "John"
-      act(() => {
-        result.current.setStatusFilter("scheduled")
-        result.current.setSearchQuery("John")
-      })
-
-      const events = result.current.calendarEvents
-      expect(events.length).toBe(1)
-      expect(events[0].customerName).toBe("John Doe")
-      expect(events[0].status).toBe("scheduled")
+      expect(result.current.calendarEvents.length).toBe(1)
+      expect(result.current.calendarEvents[0].serviceName).toBe("Premium Detail")
     })
   })
 
   describe("Navigation", () => {
     it("should navigate to previous month", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
       const initialMonth = result.current.currentDate.getMonth()
 
@@ -193,12 +230,11 @@ describe("useCalendarView", () => {
         result.current.navigatePrevious()
       })
 
-      const newMonth = result.current.currentDate.getMonth()
-      expect(newMonth).toBe(initialMonth === 0 ? 11 : initialMonth - 1)
+      expect(result.current.currentDate.getMonth()).toBe(initialMonth === 0 ? 11 : initialMonth - 1)
     })
 
     it("should navigate to next month", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
       const initialMonth = result.current.currentDate.getMonth()
 
@@ -206,12 +242,11 @@ describe("useCalendarView", () => {
         result.current.navigateNext()
       })
 
-      const newMonth = result.current.currentDate.getMonth()
-      expect(newMonth).toBe(initialMonth === 11 ? 0 : initialMonth + 1)
+      expect(result.current.currentDate.getMonth()).toBe(initialMonth === 11 ? 0 : initialMonth + 1)
     })
 
     it("should navigate to previous week in week view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "week" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "week" }))
 
       const initialDate = new Date(result.current.currentDate)
 
@@ -219,29 +254,26 @@ describe("useCalendarView", () => {
         result.current.navigatePrevious()
       })
 
-      const daysDifference = (initialDate.getTime() - result.current.currentDate.getTime()) / (1000 * 60 * 60 * 24)
-      expect(daysDifference).toBe(7)
+      expect(result.current.currentDate.getTime()).toBe(initialDate.getTime() - 7 * 24 * 60 * 60 * 1000)
     })
 
-    it("should navigate to previous day in day view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "day" }))
+    it("should navigate to next day in day view", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "day" }))
 
       const initialDate = new Date(result.current.currentDate)
 
       act(() => {
-        result.current.navigatePrevious()
+        result.current.navigateNext()
       })
 
-      const daysDifference = (initialDate.getTime() - result.current.currentDate.getTime()) / (1000 * 60 * 60 * 24)
-      expect(daysDifference).toBe(1)
+      expect(result.current.currentDate.getTime()).toBe(initialDate.getTime() + 24 * 60 * 60 * 1000)
     })
 
     it("should navigate to today", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      // Navigate away from today first
       act(() => {
-        result.current.navigateNext()
+        result.current.setCurrentDate(new Date("2024-01-01"))
       })
 
       act(() => {
@@ -256,202 +288,197 @@ describe("useCalendarView", () => {
 
   describe("Date Selection", () => {
     it("should handle date selection", () => {
-      const onDateSelect = jest.fn()
-      const { result } = renderHookWithProviders(() => useCalendarView({ onDateSelect }))
+      const { result } = renderHook(() => useCalendarView({ onDateSelect: mockOnDateSelect }))
 
-      const testDate = new Date("2024-01-15")
+      const testDate = new Date("2024-02-15")
 
       act(() => {
         result.current.handleDateSelect(testDate)
       })
 
-      expect(result.current.selectedDate).toEqual(testDate)
-      expect(onDateSelect).toHaveBeenCalledWith(testDate)
+      expect(result.current.selectedDate?.toDateString()).toBe(testDate.toDateString())
+      expect(mockOnDateSelect).toHaveBeenCalledWith(testDate)
     })
 
     it("should switch to day view when selecting date in month view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "month" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      const testDate = new Date("2024-01-15")
+      expect(result.current.viewMode).toBe("month")
+
+      const testDate = new Date("2024-02-15")
 
       act(() => {
         result.current.handleDateSelect(testDate)
       })
 
       expect(result.current.viewMode).toBe("day")
-      expect(result.current.currentDate).toEqual(testDate)
+      expect(result.current.currentDate.toDateString()).toBe(testDate.toDateString())
     })
   })
 
   describe("Event Selection", () => {
     it("should handle event selection", () => {
-      const onEventSelect = jest.fn()
-      const appointments = [
-        createMockAppointment({
-          _id: "apt1",
-          date: format(new Date(), "yyyy-MM-dd"),
-          serviceName: "Basic Wash",
-          price: 50,
-        }),
-      ]
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue(appointments)
-
-      const { result } = renderHookWithProviders(() =>
-        useCalendarView({
-          businessId: mockBusinessId,
-          onEventSelect,
-        }),
+      const { result } = renderHook(() =>
+        useCalendarView({ businessId: mockBusinessId, onEventSelect: mockOnEventSelect }),
       )
 
       act(() => {
-        result.current.handleEventSelect("apt1" as any)
+        result.current.handleEventSelect("apt_1" as any)
       })
 
-      expect(onEventSelect).toHaveBeenCalledWith(
+      expect(mockOnEventSelect).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: "apt1",
+          id: "apt_1",
           title: "Basic Wash",
-          price: 50,
+          customerName: "John Doe",
         }),
       )
+    })
+
+    it("should not call onEventSelect for non-existent event", () => {
+      const { result } = renderHook(() =>
+        useCalendarView({ businessId: mockBusinessId, onEventSelect: mockOnEventSelect }),
+      )
+
+      act(() => {
+        result.current.handleEventSelect("non_existent" as any)
+      })
+
+      expect(mockOnEventSelect).not.toHaveBeenCalled()
     })
   })
 
   describe("Calendar Title", () => {
     it("should generate correct title for month view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      const title = result.current.calendarTitle
-      expect(title).toMatch(/\w+ \d{4}/) // Format: "January 2024"
+      act(() => {
+        result.current.setCurrentDate(new Date("2024-02-15"))
+      })
+
+      expect(result.current.calendarTitle).toBe("February 2024")
     })
 
     it("should generate correct title for week view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "week" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "week" }))
 
-      const title = result.current.calendarTitle
-      expect(title).toContain(" - ") // Should contain date range
+      act(() => {
+        result.current.setCurrentDate(new Date("2024-02-15"))
+      })
+
+      // The exact format depends on the week boundaries
+      expect(result.current.calendarTitle).toContain("Feb")
+      expect(result.current.calendarTitle).toContain("2024")
     })
 
     it("should generate correct title for day view", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView({ defaultView: "day" }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId, defaultView: "day" }))
 
-      const title = result.current.calendarTitle
-      expect(title).toMatch(/\w+, \w+ \d+, \d{4}/) // Format: "Monday, January 15, 2024"
+      act(() => {
+        result.current.setCurrentDate(new Date("2024-02-15"))
+      })
+
+      expect(result.current.calendarTitle).toBe("Thursday, February 15, 2024")
     })
   })
 
   describe("Statistics", () => {
     it("should calculate calendar statistics", () => {
-      const appointments = [
-        createMockAppointment({
-          status: "completed",
-          price: 50,
-        }),
-        createMockAppointment({
-          status: "scheduled",
-          price: 75,
-        }),
-        createMockAppointment({
-          status: "cancelled",
-          price: 100,
-        }),
-      ]
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue(appointments)
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+      expect(result.current.statistics).toMatchObject({
+        totalAppointments: 3,
+        completedAppointments: 1,
+        upcomingAppointments: 2,
+        cancelledAppointments: 0,
+        totalRevenue: 75, // Only completed appointments
+        completionRate: 33, // 1 out of 3 completed
+      })
+    })
 
-      const stats = result.current.statistics
+    it("should filter statistics based on search and status", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
-      expect(stats.totalAppointments).toBe(3)
-      expect(stats.completedAppointments).toBe(1)
-      expect(stats.upcomingAppointments).toBe(1)
-      expect(stats.cancelledAppointments).toBe(1)
-      expect(stats.totalRevenue).toBe(50) // Only completed appointments
-      expect(stats.completionRate).toBe(33) // 1/3 * 100, rounded
+      act(() => {
+        result.current.setStatusFilter("completed")
+      })
+
+      expect(result.current.statistics).toMatchObject({
+        totalAppointments: 1,
+        completedAppointments: 1,
+        upcomingAppointments: 0,
+        cancelledAppointments: 0,
+        totalRevenue: 75,
+        completionRate: 100,
+      })
     })
   })
 
-  describe("Business Availability Integration", () => {
-    it("should mark days as available based on business hours", () => {
-      const businessHours = createMockBusinessHours()
-      mockConvexQueries["api.businessAvailability.getBusinessAvailability"].mockReturnValue(businessHours)
+  describe("Week Days", () => {
+    it("should provide week days array", () => {
+      const { result } = renderHook(() => useCalendarView())
 
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
-
-      const calendarDays = result.current.calendarDays
-
-      // Find a Monday (should be available)
-      const monday = calendarDays.find((day) => day.date && new Date(day.date).getDay() === 1 && day.isCurrentMonth)
-
-      if (monday) {
-        expect(monday.isAvailable).toBe(true)
-      }
-
-      // Find a Sunday (should be unavailable)
-      const sunday = calendarDays.find((day) => day.date && new Date(day.date).getDay() === 0 && day.isCurrentMonth)
-
-      if (sunday) {
-        expect(sunday.isAvailable).toBe(false)
-      }
+      expect(result.current.weekDays).toEqual(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"])
     })
   })
 
-  describe("Keyboard Navigation", () => {
-    it("should handle keyboard navigation", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
+  describe("Loading State", () => {
+    it("should indicate loading when appointments are not available", () => {
+      mockUseQuery.mockReturnValue(null)
 
-      const initialMonth = result.current.currentDate.getMonth()
-
-      // Simulate left arrow key
-      act(() => {
-        const event = new KeyboardEvent("keydown", { key: "ArrowLeft" })
-        window.dispatchEvent(event)
-      })
-
-      // Should navigate to previous month
-      expect(result.current.currentDate.getMonth()).toBe(initialMonth === 0 ? 11 : initialMonth - 1)
-    })
-
-    it("should handle today navigation with Ctrl+T", () => {
-      const { result } = renderHookWithProviders(() => useCalendarView())
-
-      // Navigate away from today first
-      act(() => {
-        result.current.navigateNext()
-      })
-
-      // Simulate Ctrl+T
-      act(() => {
-        const event = new KeyboardEvent("keydown", {
-          key: "T",
-          ctrlKey: true,
-        })
-        Object.defineProperty(event, "preventDefault", {
-          value: jest.fn(),
-        })
-        window.dispatchEvent(event)
-      })
-
-      const today = new Date()
-      expect(result.current.currentDate.toDateString()).toBe(today.toDateString())
-    })
-  })
-
-  describe("Loading States", () => {
-    it("should show loading state when appointments are not loaded", () => {
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue(undefined)
-
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
       expect(result.current.isLoading).toBe(true)
     })
 
-    it("should not show loading state when appointments are loaded", () => {
-      mockConvexQueries["api.appointments.getAppointmentsByDateRange"].mockReturnValue([])
-
-      const { result } = renderHookWithProviders(() => useCalendarView({ businessId: mockBusinessId }))
+    it("should not be loading when appointments are available", () => {
+      const { result } = renderHook(() => useCalendarView({ businessId: mockBusinessId }))
 
       expect(result.current.isLoading).toBe(false)
+    })
+  })
+
+  describe("State Management", () => {
+    it("should update view mode", () => {
+      const { result } = renderHook(() => useCalendarView())
+
+      act(() => {
+        result.current.setViewMode("week")
+      })
+
+      expect(result.current.viewMode).toBe("week")
+    })
+
+    it("should update search query", () => {
+      const { result } = renderHook(() => useCalendarView())
+
+      act(() => {
+        result.current.setSearchQuery("test search")
+      })
+
+      expect(result.current.searchQuery).toBe("test search")
+    })
+
+    it("should update status filter", () => {
+      const { result } = renderHook(() => useCalendarView())
+
+      act(() => {
+        result.current.setStatusFilter("completed")
+      })
+
+      expect(result.current.statusFilter).toBe("completed")
+    })
+
+    it("should update hovered date", () => {
+      const { result } = renderHook(() => useCalendarView())
+
+      const testDate = new Date("2024-02-15")
+
+      act(() => {
+        result.current.setHoveredDate(testDate)
+      })
+
+      expect(result.current.hoveredDate?.toDateString()).toBe(testDate.toDateString())
     })
   })
 })

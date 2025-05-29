@@ -1,47 +1,58 @@
-import { act, waitFor } from "@testing-library/react"
+import { renderHook, act } from "@testing-library/react"
+import { useUser } from "@clerk/nextjs"
+import { useMutation, useQuery } from "convex/react"
 import { useAppointmentForm } from "@/hooks/use-appointment-form"
-import {
-  renderHookWithProviders,
-  setupMocks,
-  mockConvexMutations,
-  mockConvexQueries,
-  createMockAppointment,
-  mockToast,
-} from "./test-utils"
+import { toast } from "@/hooks/use-toast"
+import { mockUser, mockAppointment } from "../utils/test-utils"
 
 // Mock dependencies
-jest.mock("@clerk/nextjs", () => ({
-  useUser: () => ({
-    user: { id: "user_123" },
-    isLoaded: true,
-    isSignedIn: true,
-  }),
-}))
+jest.mock("@clerk/nextjs")
+jest.mock("convex/react")
+jest.mock("@/hooks/use-toast")
 
-jest.mock("convex/react", () => ({
-  useQuery: jest.fn((query) => {
-    if (query === "api.appointments.getAppointmentDetails") {
-      return mockConvexQueries[query]()
-    }
-    return null
-  }),
-  useMutation: jest.fn((mutation) => mockConvexMutations[mutation]),
-}))
-
-jest.mock("@/hooks/use-toast", () => ({
-  toast: mockToast,
-}))
+const mockUseUser = useUser as jest.MockedFunction<typeof useUser>
+const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>
+const mockUseMutation = useMutation as jest.MockedFunction<typeof useMutation>
+const mockToast = toast as jest.MockedFunction<typeof toast>
 
 describe("useAppointmentForm", () => {
+  const mockCreateAppointment = jest.fn()
+  const mockUpdateAppointment = jest.fn()
+  const mockCheckAvailability = jest.fn()
+  const mockOnSuccess = jest.fn()
+  const mockOnError = jest.fn()
+
   beforeEach(() => {
-    setupMocks()
-    mockToast.mockClear()
     jest.clearAllMocks()
+
+    mockUseUser.mockReturnValue({
+      user: mockUser,
+      isLoaded: true,
+      isSignedIn: true,
+    })
+
+    mockUseQuery.mockReturnValue(null)
+    mockUseMutation.mockImplementation((mutation) => {
+      if (mutation.toString().includes("createValidatedAppointment")) {
+        return mockCreateAppointment
+      }
+      if (mutation.toString().includes("updateValidatedAppointment")) {
+        return mockUpdateAppointment
+      }
+      if (mutation.toString().includes("checkAvailability")) {
+        return mockCheckAvailability
+      }
+      return jest.fn()
+    })
+
+    mockCheckAvailability.mockResolvedValue(true)
+    mockCreateAppointment.mockResolvedValue("appointment_123")
+    mockUpdateAppointment.mockResolvedValue(undefined)
   })
 
   describe("Initial State", () => {
     it("should initialize with empty form data", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
       expect(result.current.formData).toEqual({
         businessId: "",
@@ -60,24 +71,28 @@ describe("useAppointmentForm", () => {
       expect(result.current.isFormValid).toBe(false)
     })
 
-    it("should load existing appointment data in edit mode", async () => {
-      const mockAppointment = createMockAppointment()
-      mockConvexQueries["api.appointments.getAppointmentDetails"].mockReturnValue(mockAppointment)
+    it("should load existing appointment data when appointmentId is provided", () => {
+      mockUseQuery.mockReturnValue(mockAppointment)
 
-      const { result } = renderHookWithProviders(() => useAppointmentForm({ appointmentId: "appointment_123" }))
+      const { result } = renderHook(() => useAppointmentForm({ appointmentId: "appointment_123" as any }))
 
-      await waitFor(() => {
-        expect(result.current.formData.businessId).toBe(mockAppointment.businessId)
-        expect(result.current.formData.serviceId).toBe(mockAppointment.serviceId)
-        expect(result.current.formData.date).toBe(mockAppointment.date)
-        expect(result.current.isEditMode).toBe(true)
+      expect(result.current.formData).toEqual({
+        businessId: mockAppointment.businessId,
+        serviceId: mockAppointment.serviceType,
+        vehicleId: mockAppointment.vehicleId,
+        date: mockAppointment.date,
+        startTime: mockAppointment.startTime,
+        endTime: mockAppointment.endTime,
+        notes: mockAppointment.notes,
+        staffId: "",
       })
+      expect(result.current.isEditMode).toBe(true)
     })
   })
 
-  describe("Form Field Management", () => {
-    it("should update form field values", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+  describe("Field Management", () => {
+    it("should update field value and mark form as dirty", () => {
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
         result.current.handleFieldChange("businessId", "business_123")
@@ -85,22 +100,28 @@ describe("useAppointmentForm", () => {
 
       expect(result.current.formData.businessId).toBe("business_123")
       expect(result.current.isDirty).toBe(true)
+      expect(result.current.formProgress).toBe(20) // 1 of 5 required fields
     })
 
     it("should clear end time when start time changes", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
-        result.current.handleFieldChange("endTime", "12:00")
         result.current.handleFieldChange("startTime", "10:00")
+        result.current.handleFieldChange("endTime", "12:00")
       })
 
-      expect(result.current.formData.startTime).toBe("10:00")
+      expect(result.current.formData.endTime).toBe("12:00")
+
+      act(() => {
+        result.current.handleFieldChange("startTime", "11:00")
+      })
+
       expect(result.current.formData.endTime).toBe("")
     })
 
-    it("should validate fields on blur", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+    it("should validate field on blur if touched", () => {
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
         result.current.handleFieldBlur("businessId")
@@ -109,76 +130,84 @@ describe("useAppointmentForm", () => {
       expect(result.current.errors.businessId).toBe("Business selection is required")
     })
 
-    it("should calculate form progress correctly", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+    it("should validate field on change if already touched", () => {
+      const { result } = renderHook(() => useAppointmentForm())
 
+      // Touch the field first
       act(() => {
-        result.current.handleFieldChange("businessId", "business_123")
-        result.current.handleFieldChange("serviceId", "service_123")
+        result.current.handleFieldBlur("businessId")
       })
 
-      expect(result.current.formProgress).toBe(40) // 2 out of 5 required fields
+      expect(result.current.errors.businessId).toBe("Business selection is required")
+
+      // Now change the field - should clear error
+      act(() => {
+        result.current.handleFieldChange("businessId", "business_123")
+      })
+
+      expect(result.current.errors.businessId).toBeUndefined()
     })
   })
 
   describe("Form Validation", () => {
     it("should validate required fields", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
         const isValid = result.current.validateForm()
         expect(isValid).toBe(false)
       })
 
-      expect(result.current.errors.businessId).toBe("Business selection is required")
-      expect(result.current.errors.serviceId).toBe("Service selection is required")
-      expect(result.current.errors.date).toBe("Invalid date format")
+      expect(result.current.errors).toMatchObject({
+        businessId: expect.stringContaining("required"),
+        serviceId: expect.stringContaining("required"),
+        date: expect.stringContaining("Invalid date format"),
+        startTime: expect.stringContaining("Invalid time format"),
+        endTime: expect.stringContaining("Invalid time format"),
+      })
     })
 
     it("should validate date format", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
-      act(() => {
-        result.current.handleFieldChange("date", "invalid-date")
-        result.current.handleFieldBlur("date")
-      })
+      const validationResult = result.current.validateField("date", "invalid-date")
+      expect(validationResult).toBe("Invalid date format")
 
-      expect(result.current.errors.date).toBe("Invalid date format")
+      const validResult = result.current.validateField("date", "2024-02-15")
+      expect(validResult).toBeUndefined()
     })
 
     it("should validate time format", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
-      act(() => {
-        result.current.handleFieldChange("startTime", "25:00")
-        result.current.handleFieldBlur("startTime")
-      })
+      const invalidResult = result.current.validateField("startTime", "25:00")
+      expect(invalidResult).toBe("Invalid time format")
 
-      expect(result.current.errors.startTime).toBe("Invalid time format")
+      const validResult = result.current.validateField("startTime", "10:30")
+      expect(validResult).toBeUndefined()
     })
 
     it("should validate notes length", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
+
       const longNotes = "a".repeat(501)
+      const validationResult = result.current.validateField("notes", longNotes)
+      expect(validationResult).toBe("Notes must be less than 500 characters")
 
-      act(() => {
-        result.current.handleFieldChange("notes", longNotes)
-        result.current.handleFieldBlur("notes")
-      })
-
-      expect(result.current.errors.notes).toBe("Notes must be less than 500 characters")
+      const validResult = result.current.validateField("notes", "Valid notes")
+      expect(validResult).toBeUndefined()
     })
   })
 
   describe("Availability Checking", () => {
     it("should check time slot availability", async () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
         result.current.handleFieldChange("businessId", "business_123")
-        result.current.handleFieldChange("date", "2024-01-15")
+        result.current.handleFieldChange("date", "2024-02-15")
         result.current.handleFieldChange("startTime", "10:00")
-        result.current.handleFieldChange("endTime", "11:00")
+        result.current.handleFieldChange("endTime", "12:00")
       })
 
       await act(async () => {
@@ -186,24 +215,24 @@ describe("useAppointmentForm", () => {
         expect(isAvailable).toBe(true)
       })
 
-      expect(mockConvexMutations["api.appointments.checkAvailability"]).toHaveBeenCalledWith({
+      expect(mockCheckAvailability).toHaveBeenCalledWith({
         businessId: "business_123",
-        date: "2024-01-15",
+        date: "2024-02-15",
         startTime: "10:00",
-        endTime: "11:00",
+        endTime: "12:00",
         excludeAppointmentId: undefined,
       })
     })
 
-    it("should handle unavailable time slots", async () => {
-      mockConvexMutations["api.appointments.checkAvailability"].mockResolvedValue(false)
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+    it("should handle unavailable time slot", async () => {
+      mockCheckAvailability.mockResolvedValue(false)
+      const { result } = renderHook(() => useAppointmentForm())
 
       act(() => {
         result.current.handleFieldChange("businessId", "business_123")
-        result.current.handleFieldChange("date", "2024-01-15")
+        result.current.handleFieldChange("date", "2024-02-15")
         result.current.handleFieldChange("startTime", "10:00")
-        result.current.handleFieldChange("endTime", "11:00")
+        result.current.handleFieldChange("endTime", "12:00")
       })
 
       await act(async () => {
@@ -213,23 +242,40 @@ describe("useAppointmentForm", () => {
 
       expect(result.current.errors.startTime).toBe("This time slot is not available")
     })
+
+    it("should return false for incomplete data", async () => {
+      const { result } = renderHook(() => useAppointmentForm())
+
+      await act(async () => {
+        const isAvailable = await result.current.checkTimeSlotAvailability()
+        expect(isAvailable).toBe(false)
+      })
+
+      expect(mockCheckAvailability).not.toHaveBeenCalled()
+    })
   })
 
   describe("Form Submission", () => {
     const validFormData = {
       businessId: "business_123",
       serviceId: "service_123",
-      date: "2024-01-15",
+      date: "2024-02-15",
       startTime: "10:00",
-      endTime: "11:00",
-      notes: "Test notes",
-      vehicleId: "vehicle_123",
-      staffId: "staff_123",
+      endTime: "12:00",
     }
 
+    beforeEach(() => {
+      const { result } = renderHook(() => useAppointmentForm({ onSuccess: mockOnSuccess, onError: mockOnError }))
+
+      act(() => {
+        Object.entries(validFormData).forEach(([key, value]) => {
+          result.current.handleFieldChange(key as any, value)
+        })
+      })
+    })
+
     it("should create new appointment successfully", async () => {
-      const onSuccess = jest.fn()
-      const { result } = renderHookWithProviders(() => useAppointmentForm({ onSuccess }))
+      const { result } = renderHook(() => useAppointmentForm({ onSuccess: mockOnSuccess }))
 
       // Set valid form data
       act(() => {
@@ -242,25 +288,23 @@ describe("useAppointmentForm", () => {
         await result.current.handleSubmit()
       })
 
-      expect(mockConvexMutations["api.validatedAppointments.createValidatedAppointment"]).toHaveBeenCalledWith({
+      expect(mockCreateAppointment).toHaveBeenCalledWith({
         ...validFormData,
-        customerId: "user_123",
+        customerId: mockUser.id,
+        vehicleId: "",
+        notes: "",
+        staffId: "",
       })
-      expect(onSuccess).toHaveBeenCalledWith("appointment_123")
+      expect(mockOnSuccess).toHaveBeenCalledWith("appointment_123")
       expect(mockToast).toHaveBeenCalledWith({
         title: "Appointment Booked",
         description: "Your appointment has been successfully booked!",
       })
     })
 
-    it("should update existing appointment successfully", async () => {
-      const onSuccess = jest.fn()
-      const { result } = renderHookWithProviders(() =>
-        useAppointmentForm({
-          appointmentId: "appointment_123",
-          onSuccess,
-        }),
-      )
+    it("should update existing appointment", async () => {
+      const appointmentId = "appointment_123" as any
+      const { result } = renderHook(() => useAppointmentForm({ appointmentId, onSuccess: mockOnSuccess }))
 
       // Set valid form data
       act(() => {
@@ -273,12 +317,15 @@ describe("useAppointmentForm", () => {
         await result.current.handleSubmit()
       })
 
-      expect(mockConvexMutations["api.validatedAppointments.updateValidatedAppointment"]).toHaveBeenCalledWith({
-        appointmentId: "appointment_123",
+      expect(mockUpdateAppointment).toHaveBeenCalledWith({
+        appointmentId,
         ...validFormData,
-        customerId: "user_123",
+        customerId: mockUser.id,
+        vehicleId: "",
+        notes: "",
+        staffId: "",
       })
-      expect(onSuccess).toHaveBeenCalledWith("appointment_123")
+      expect(mockOnSuccess).toHaveBeenCalledWith(appointmentId)
       expect(mockToast).toHaveBeenCalledWith({
         title: "Appointment Updated",
         description: "Your appointment has been successfully updated.",
@@ -286,26 +333,23 @@ describe("useAppointmentForm", () => {
     })
 
     it("should handle validation errors during submission", async () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
       await act(async () => {
         await result.current.handleSubmit()
       })
 
+      expect(mockCreateAppointment).not.toHaveBeenCalled()
       expect(mockToast).toHaveBeenCalledWith({
         title: "Validation Error",
         description: "Please fix the errors in the form before submitting.",
         variant: "destructive",
       })
-      expect(mockConvexMutations["api.validatedAppointments.createValidatedAppointment"]).not.toHaveBeenCalled()
     })
 
-    it("should handle submission errors", async () => {
-      const onError = jest.fn()
-      const error = new Error("Submission failed")
-      mockConvexMutations["api.validatedAppointments.createValidatedAppointment"].mockRejectedValue(error)
-
-      const { result } = renderHookWithProviders(() => useAppointmentForm({ onError }))
+    it("should handle availability check failure during submission", async () => {
+      mockCheckAvailability.mockResolvedValue(false)
+      const { result } = renderHook(() => useAppointmentForm())
 
       // Set valid form data
       act(() => {
@@ -318,101 +362,135 @@ describe("useAppointmentForm", () => {
         await result.current.handleSubmit()
       })
 
-      expect(onError).toHaveBeenCalledWith(error)
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Submission Failed",
-        description: "Submission failed",
-        variant: "destructive",
-      })
-    })
-
-    it("should prevent submission if time slot is unavailable", async () => {
-      mockConvexMutations["api.appointments.checkAvailability"].mockResolvedValue(false)
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
-
-      // Set valid form data
-      act(() => {
-        Object.entries(validFormData).forEach(([key, value]) => {
-          result.current.handleFieldChange(key as any, value)
-        })
-      })
-
-      await act(async () => {
-        await result.current.handleSubmit()
-      })
-
+      expect(mockCreateAppointment).not.toHaveBeenCalled()
       expect(mockToast).toHaveBeenCalledWith({
         title: "Time Slot Unavailable",
         description: "The selected time slot is no longer available. Please choose another time.",
         variant: "destructive",
       })
-      expect(mockConvexMutations["api.validatedAppointments.createValidatedAppointment"]).not.toHaveBeenCalled()
+    })
+
+    it("should handle submission errors", async () => {
+      const error = new Error("Network error")
+      mockCreateAppointment.mockRejectedValue(error)
+
+      const { result } = renderHook(() => useAppointmentForm({ onError: mockOnError }))
+
+      // Set valid form data
+      act(() => {
+        Object.entries(validFormData).forEach(([key, value]) => {
+          result.current.handleFieldChange(key as any, value)
+        })
+      })
+
+      await act(async () => {
+        await result.current.handleSubmit()
+      })
+
+      expect(mockOnError).toHaveBeenCalledWith(error)
+      expect(mockToast).toHaveBeenCalledWith({
+        title: "Submission Failed",
+        description: "Network error",
+        variant: "destructive",
+      })
+    })
+
+    it("should set loading state during submission", async () => {
+      const { result } = renderHook(() => useAppointmentForm())
+
+      // Set valid form data
+      act(() => {
+        Object.entries(validFormData).forEach(([key, value]) => {
+          result.current.handleFieldChange(key as any, value)
+        })
+      })
+
+      const submitPromise = act(async () => {
+        await result.current.handleSubmit()
+      })
+
+      expect(result.current.isSubmitting).toBe(true)
+
+      await submitPromise
+
+      expect(result.current.isSubmitting).toBe(false)
     })
   })
 
   describe("Form Reset", () => {
     it("should reset form to initial state", () => {
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
+      const { result } = renderHook(() => useAppointmentForm())
 
-      // Make changes to form
+      // Modify form state
       act(() => {
         result.current.handleFieldChange("businessId", "business_123")
-        result.current.handleFieldChange("notes", "Some notes")
+        result.current.handleFieldBlur("businessId")
       })
 
       expect(result.current.isDirty).toBe(true)
+      expect(result.current.formData.businessId).toBe("business_123")
 
       // Reset form
       act(() => {
         result.current.resetForm()
       })
 
-      expect(result.current.formData.businessId).toBe("")
-      expect(result.current.formData.notes).toBe("")
-      expect(result.current.isDirty).toBe(false)
+      expect(result.current.formData).toEqual({
+        businessId: "",
+        serviceId: "",
+        vehicleId: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        notes: "",
+        staffId: "",
+      })
       expect(result.current.errors).toEqual({})
+      expect(result.current.isDirty).toBe(false)
+      expect(result.current.touchedFields.size).toBe(0)
     })
   })
 
-  describe("Loading States", () => {
-    it("should show submitting state during form submission", async () => {
-      let resolveSubmission: (value: any) => void
-      const submissionPromise = new Promise((resolve) => {
-        resolveSubmission = resolve
-      })
+  describe("Form Progress", () => {
+    it("should calculate form progress correctly", () => {
+      const { result } = renderHook(() => useAppointmentForm())
 
-      mockConvexMutations["api.validatedAppointments.createValidatedAppointment"].mockReturnValue(submissionPromise)
+      // No fields filled - 0%
+      expect(result.current.formProgress).toBe(0)
 
-      const { result } = renderHookWithProviders(() => useAppointmentForm())
-
-      // Set valid form data
+      // Fill 2 of 5 required fields - 40%
       act(() => {
-        Object.entries({
-          businessId: "business_123",
-          serviceId: "service_123",
-          date: "2024-01-15",
-          startTime: "10:00",
-          endTime: "11:00",
-        }).forEach(([key, value]) => {
-          result.current.handleFieldChange(key as any, value)
-        })
+        result.current.handleFieldChange("businessId", "business_123")
+        result.current.handleFieldChange("serviceId", "service_123")
       })
 
-      // Start submission
+      expect(result.current.formProgress).toBe(40)
+
+      // Fill all required fields - 100%
       act(() => {
-        result.current.handleSubmit()
+        result.current.handleFieldChange("date", "2024-02-15")
+        result.current.handleFieldChange("startTime", "10:00")
+        result.current.handleFieldChange("endTime", "12:00")
       })
 
-      expect(result.current.isSubmitting).toBe(true)
+      expect(result.current.formProgress).toBe(100)
+    })
 
-      // Resolve submission
+    it("should determine form validity", () => {
+      const { result } = renderHook(() => useAppointmentForm())
+
+      expect(result.current.isFormValid).toBe(false)
+
+      // Fill all required fields
       act(() => {
-        resolveSubmission("appointment_123")
+        result.current.handleFieldChange("businessId", "business_123")
+        result.current.handleFieldChange("serviceId", "service_123")
+        result.current.handleFieldChange("date", "2024-02-15")
+        result.current.handleFieldChange("startTime", "10:00")
+        result.current.handleFieldChange("endTime", "12:00")
       })
 
-      await waitFor(() => {
-        expect(result.current.isSubmitting).toBe(false)
-      })
+      expect(result.current.isFormValid).toBe(true)
     })
   })
 })

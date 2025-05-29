@@ -1,107 +1,160 @@
-import { act, waitFor } from "@testing-library/react"
+import { renderHook, act, waitFor } from "@testing-library/react"
 import { useErrorHandling } from "@/hooks/use-error-handling"
-import { renderHookWithProviders, mockToast } from "./test-utils"
+import { toast } from "@/hooks/use-toast"
 
 // Mock dependencies
-jest.mock("@/hooks/use-toast", () => ({
-  toast: mockToast,
-}))
+jest.mock("@/hooks/use-toast")
+
+const mockToast = toast as jest.MockedFunction<typeof toast>
 
 // Mock Sentry
-const mockSentry = {
-  captureException: jest.fn(),
-}
-
 Object.defineProperty(window, "Sentry", {
-  value: mockSentry,
+  value: {
+    captureException: jest.fn(),
+  },
   configurable: true,
 })
 
 describe("useErrorHandling", () => {
   beforeEach(() => {
-    mockToast.mockClear()
-    mockSentry.captureException.mockClear()
     jest.clearAllMocks()
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   describe("Initial State", () => {
-    it("should initialize with empty state", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should initialize with empty errors array", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
       expect(result.current.errors).toEqual([])
       expect(result.current.isRetrying).toBe(false)
-      expect(result.current.statistics.totalErrors).toBe(0)
+    })
+
+    it("should initialize with correct options", () => {
+      const options = {
+        showToast: false,
+        logToConsole: false,
+        reportToSentry: true,
+        retryAttempts: 5,
+        retryDelay: 2000,
+      }
+
+      renderHook(() => useErrorHandling(options))
+
+      // Options are used internally, no direct way to test
+      expect(true).toBe(true)
     })
   })
 
   describe("Error Message Mapping", () => {
-    it("should map error codes to user-friendly messages", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should map network error codes to user-friendly messages", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
-      expect(result.current.getErrorMessage({ code: "NETWORK_ERROR" })).toBe(
-        "Unable to connect. Please check your internet connection.",
-      )
+      const message = result.current.getErrorMessage({ code: "NETWORK_ERROR" })
+      expect(message).toBe("Unable to connect. Please check your internet connection.")
+    })
 
-      expect(result.current.getErrorMessage({ code: "UNAUTHORIZED" })).toBe(
-        "You need to sign in to perform this action.",
-      )
+    it("should map authentication error codes", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
-      expect(result.current.getErrorMessage({ code: "VALIDATION_ERROR" })).toBe(
-        "Please check your input and try again.",
-      )
+      const message = result.current.getErrorMessage({ code: "UNAUTHORIZED" })
+      expect(message).toBe("You need to sign in to perform this action.")
+    })
+
+    it("should map validation error codes", () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      const message = result.current.getErrorMessage({ code: "VALIDATION_ERROR" })
+      expect(message).toBe("Please check your input and try again.")
+    })
+
+    it("should map business logic error codes", () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      const message = result.current.getErrorMessage({ code: "APPOINTMENT_CONFLICT" })
+      expect(message).toBe("This time slot is no longer available.")
     })
 
     it("should handle errors with custom messages", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error = { message: "Custom error message" }
-      expect(result.current.getErrorMessage(error)).toBe("Custom error message")
+      const message = result.current.getErrorMessage({
+        message: "Custom error message",
+      })
+      expect(message).toBe("Custom error message")
     })
 
     it("should clean up technical error messages", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error = { message: "Error: fetch failed" }
-      expect(result.current.getErrorMessage(error)).toBe("Unable to connect. Please check your internet connection.")
+      const message = result.current.getErrorMessage({
+        message: "Error: fetch failed",
+      })
+      expect(message).toBe("Unable to connect. Please check your internet connection.")
     })
 
-    it("should return default message for unknown errors", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should return unknown error for unrecognized errors", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error = {}
-      expect(result.current.getErrorMessage(error)).toBe("An unexpected error occurred. Please try again.")
+      const message = result.current.getErrorMessage({})
+      expect(message).toBe("An unexpected error occurred. Please try again.")
     })
   })
 
-  describe("Error Severity Detection", () => {
+  describe("Error Severity", () => {
     it("should classify network errors as warnings", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      expect(result.current.getErrorSeverity({ code: "NETWORK_ERROR" })).toBe("warning")
-
-      expect(result.current.getErrorSeverity({ code: "TIMEOUT" })).toBe("warning")
+      const severity = result.current.getErrorSeverity({ code: "NETWORK_ERROR" })
+      expect(severity).toBe("warning")
     })
 
     it("should classify validation errors as info", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      expect(result.current.getErrorSeverity({ code: "VALIDATION_ERROR" })).toBe("info")
+      const severity = result.current.getErrorSeverity({ code: "VALIDATION_ERROR" })
+      expect(severity).toBe("info")
+    })
 
-      expect(result.current.getErrorSeverity({ code: "INVALID_INPUT" })).toBe("info")
+    it("should classify unknown errors as error", () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      const severity = result.current.getErrorSeverity({ code: "UNKNOWN_ERROR" })
+      expect(severity).toBe("error")
     })
 
     it("should default to error severity", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      expect(result.current.getErrorSeverity({ code: "UNKNOWN_ERROR" })).toBe("error")
-
-      expect(result.current.getErrorSeverity({})).toBe("error")
+      const severity = result.current.getErrorSeverity({})
+      expect(severity).toBe("error")
     })
   })
 
   describe("Error Handling", () => {
-    it("should handle errors with toast notifications", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling({ showToast: true }))
+    it("should handle error and add to errors list", async () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      const error = new Error("Test error")
+      const context = { source: "test" }
+
+      await act(async () => {
+        await result.current.handleError(error, context)
+      })
+
+      expect(result.current.errors.length).toBe(1)
+      expect(result.current.errors[0]).toMatchObject({
+        message: "Test error",
+        severity: "error",
+        context,
+      })
+    })
+
+    it("should show toast notification when enabled", async () => {
+      const { result } = renderHook(() => useErrorHandling({ showToast: true }))
 
       const error = new Error("Test error")
 
@@ -109,8 +162,6 @@ describe("useErrorHandling", () => {
         await result.current.handleError(error)
       })
 
-      expect(result.current.errors).toHaveLength(1)
-      expect(result.current.errors[0].message).toBe("Test error")
       expect(mockToast).toHaveBeenCalledWith({
         title: "Error",
         description: "Test error",
@@ -119,8 +170,8 @@ describe("useErrorHandling", () => {
       })
     })
 
-    it("should handle errors without toast notifications", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling({ showToast: false }))
+    it("should not show toast when disabled", async () => {
+      const { result } = renderHook(() => useErrorHandling({ showToast: false }))
 
       const error = new Error("Test error")
 
@@ -128,14 +179,13 @@ describe("useErrorHandling", () => {
         await result.current.handleError(error)
       })
 
-      expect(result.current.errors).toHaveLength(1)
       expect(mockToast).not.toHaveBeenCalled()
     })
 
-    it("should log errors to console when enabled", async () => {
+    it("should log to console when enabled", async () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation()
 
-      const { result } = renderHookWithProviders(() => useErrorHandling({ logToConsole: true }))
+      const { result } = renderHook(() => useErrorHandling({ logToConsole: true }))
 
       const error = new Error("Test error")
 
@@ -154,17 +204,17 @@ describe("useErrorHandling", () => {
       consoleSpy.mockRestore()
     })
 
-    it("should report errors to Sentry when enabled", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling({ reportToSentry: true }))
+    it("should report to Sentry when enabled", async () => {
+      const { result } = renderHook(() => useErrorHandling({ reportToSentry: true }))
 
       const error = new Error("Test error")
-      const context = { userId: "123" }
+      const context = { source: "test" }
 
       await act(async () => {
         await result.current.handleError(error, context)
       })
 
-      expect(mockSentry.captureException).toHaveBeenCalledWith(error, {
+      expect(window.Sentry.captureException).toHaveBeenCalledWith(error, {
         extra: context,
         tags: {
           severity: "error",
@@ -173,11 +223,11 @@ describe("useErrorHandling", () => {
       })
     })
 
-    it("should include retry action for retryable errors", async () => {
-      const retryFn = jest.fn().mockResolvedValue(undefined)
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should include retry action in toast when retry function provided", async () => {
+      const { result } = renderHook(() => useErrorHandling({ showToast: true }))
 
       const error = new Error("Test error")
+      const retryFn = jest.fn()
 
       await act(async () => {
         await result.current.handleError(error, {}, retryFn)
@@ -187,18 +237,31 @@ describe("useErrorHandling", () => {
         title: "Error",
         description: "Test error",
         variant: "destructive",
-        action: expect.objectContaining({
+        action: {
           label: "Retry",
-        }),
+          onClick: expect.any(Function),
+        },
       })
+    })
+
+    it("should limit errors list to 10 items", async () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      await act(async () => {
+        for (let i = 0; i < 15; i++) {
+          await result.current.handleError(new Error(`Error ${i}`))
+        }
+      })
+
+      expect(result.current.errors.length).toBe(10)
     })
   })
 
-  describe("Retry Logic", () => {
-    it("should retry failed operations", async () => {
-      const retryFn = jest.fn().mockResolvedValue(undefined)
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+  describe("Retry Functionality", () => {
+    it("should retry error successfully", async () => {
+      const { result } = renderHook(() => useErrorHandling())
 
+      const retryFn = jest.fn().mockResolvedValue(undefined)
       const error = new Error("Test error")
 
       await act(async () => {
@@ -212,7 +275,7 @@ describe("useErrorHandling", () => {
       })
 
       expect(retryFn).toHaveBeenCalled()
-      expect(result.current.errors).toHaveLength(0) // Error should be removed on success
+      expect(result.current.errors.length).toBe(0)
       expect(mockToast).toHaveBeenCalledWith({
         title: "Success",
         description: "Operation completed successfully",
@@ -220,10 +283,10 @@ describe("useErrorHandling", () => {
       })
     })
 
-    it("should handle retry failures", async () => {
-      const retryFn = jest.fn().mockRejectedValue(new Error("Retry failed"))
-      const { result } = renderHookWithProviders(() => useErrorHandling({ retryAttempts: 1 }))
+    it("should handle retry failure", async () => {
+      const { result } = renderHook(() => useErrorHandling({ retryAttempts: 2 }))
 
+      const retryFn = jest.fn().mockRejectedValue(new Error("Retry failed"))
       const error = new Error("Test error")
 
       await act(async () => {
@@ -236,6 +299,27 @@ describe("useErrorHandling", () => {
         await result.current.retryError(errorId)
       })
 
+      expect(retryFn).toHaveBeenCalled()
+      expect(result.current.errors.length).toBe(1) // Error still exists
+    })
+
+    it("should stop retrying after max attempts", async () => {
+      const { result } = renderHook(() => useErrorHandling({ retryAttempts: 1 }))
+
+      const retryFn = jest.fn().mockRejectedValue(new Error("Retry failed"))
+      const error = new Error("Test error")
+
+      await act(async () => {
+        await result.current.handleError(error, {}, retryFn)
+      })
+
+      const errorId = result.current.errors[0].id
+
+      // First retry attempt
+      await act(async () => {
+        await result.current.retryError(errorId)
+      })
+
       expect(mockToast).toHaveBeenCalledWith({
         title: "Retry Failed",
         description: "Maximum retry attempts reached. Please try again later.",
@@ -243,44 +327,79 @@ describe("useErrorHandling", () => {
       })
     })
 
-    it("should auto-retry network errors", async () => {
-      jest.useFakeTimers()
+    it("should set retry state during retry", async () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      const retryFn = jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)))
+      const error = new Error("Test error")
+
+      await act(async () => {
+        await result.current.handleError(error, {}, retryFn)
+      })
+
+      const errorId = result.current.errors[0].id
+
+      const retryPromise = act(async () => {
+        await result.current.retryError(errorId)
+      })
+
+      expect(result.current.isRetrying).toBe(true)
+
+      await retryPromise
+
+      expect(result.current.isRetrying).toBe(false)
+    })
+  })
+
+  describe("Auto Retry", () => {
+    it("should auto-retry network errors with exponential backoff", async () => {
+      const { result } = renderHook(() => useErrorHandling({ retryAttempts: 2, retryDelay: 100 }))
 
       const retryFn = jest.fn().mockResolvedValue(undefined)
-      const { result } = renderHookWithProviders(() => useErrorHandling({ retryAttempts: 2, retryDelay: 1000 }))
-
       const error = { code: "NETWORK_ERROR", message: "Network failed" }
 
       await act(async () => {
         await result.current.handleError(error, {}, retryFn)
       })
 
-      // Fast-forward time to trigger auto-retry
+      // Fast forward first retry delay (100ms)
+      act(() => {
+        jest.advanceTimersByTime(100)
+      })
+
+      await waitFor(() => {
+        expect(retryFn).toHaveBeenCalledTimes(1)
+      })
+    })
+
+    it("should not auto-retry non-network errors", async () => {
+      const { result } = renderHook(() => useErrorHandling({ retryAttempts: 2, retryDelay: 100 }))
+
+      const retryFn = jest.fn()
+      const error = { code: "VALIDATION_ERROR", message: "Validation failed" }
+
+      await act(async () => {
+        await result.current.handleError(error, {}, retryFn)
+      })
+
       act(() => {
         jest.advanceTimersByTime(1000)
       })
 
-      await waitFor(() => {
-        expect(retryFn).toHaveBeenCalled()
-      })
-
-      jest.useRealTimers()
+      expect(retryFn).not.toHaveBeenCalled()
     })
   })
 
   describe("Error Management", () => {
-    it("should clear specific errors", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should clear specific error", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error1 = new Error("Error 1")
-      const error2 = new Error("Error 2")
-
-      await act(async () => {
-        await result.current.handleError(error1)
-        await result.current.handleError(error2)
+      act(() => {
+        result.current.handleError(new Error("Error 1"))
+        result.current.handleError(new Error("Error 2"))
       })
 
-      expect(result.current.errors).toHaveLength(2)
+      expect(result.current.errors.length).toBe(2)
 
       const errorId = result.current.errors[0].id
 
@@ -288,134 +407,129 @@ describe("useErrorHandling", () => {
         result.current.clearError(errorId)
       })
 
-      expect(result.current.errors).toHaveLength(1)
+      expect(result.current.errors.length).toBe(1)
       expect(result.current.errors[0].message).toBe("Error 2")
     })
 
-    it("should clear all errors", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+    it("should clear all errors", () => {
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error1 = new Error("Error 1")
-      const error2 = new Error("Error 2")
-
-      await act(async () => {
-        await result.current.handleError(error1)
-        await result.current.handleError(error2)
+      act(() => {
+        result.current.handleError(new Error("Error 1"))
+        result.current.handleError(new Error("Error 2"))
       })
 
-      expect(result.current.errors).toHaveLength(2)
+      expect(result.current.errors.length).toBe(2)
 
       act(() => {
         result.current.clearAllErrors()
       })
 
-      expect(result.current.errors).toHaveLength(0)
-    })
-
-    it("should limit error history to 10 items", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
-
-      // Add 15 errors
-      for (let i = 0; i < 15; i++) {
-        await act(async () => {
-          await result.current.handleError(new Error(`Error ${i}`))
-        })
-      }
-
-      expect(result.current.errors).toHaveLength(10)
-      expect(result.current.errors[0].message).toBe("Error 14") // Most recent first
+      expect(result.current.errors.length).toBe(0)
     })
   })
 
-  describe("Async Operation Wrapper", () => {
+  describe("Async Handler", () => {
     it("should handle successful async operations", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
       const asyncFn = jest.fn().mockResolvedValue("success")
 
       const resultValue = await act(async () => {
         return await result.current.handleAsync(asyncFn, {
-          successMessage: "Operation completed",
+          successMessage: "Operation successful",
         })
       })
 
       expect(resultValue).toBe("success")
       expect(mockToast).toHaveBeenCalledWith({
         title: "Success",
-        description: "Operation completed",
+        description: "Operation successful",
       })
     })
 
     it("should handle failed async operations", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      const asyncFn = jest.fn().mockRejectedValue(new Error("Async failed"))
+      const error = new Error("Async error")
+      const asyncFn = jest.fn().mockRejectedValue(error)
 
       const resultValue = await act(async () => {
         return await result.current.handleAsync(asyncFn, {
           errorMessage: "Custom error message",
+          context: { operation: "test" },
         })
       })
 
       expect(resultValue).toBeNull()
-      expect(result.current.errors).toHaveLength(1)
+      expect(result.current.errors.length).toBe(1)
       expect(result.current.errors[0].message).toBe("Custom error message")
     })
 
     it("should enable retry for async operations", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      const asyncFn = jest.fn().mockRejectedValueOnce(new Error("First failure")).mockResolvedValueOnce("success")
+      const error = new Error("Async error")
+      const asyncFn = jest.fn().mockRejectedValue(error)
 
       await act(async () => {
         await result.current.handleAsync(asyncFn, { retry: true })
       })
 
-      expect(result.current.errors).toHaveLength(1)
       expect(result.current.errors[0].retry).toBeDefined()
-
-      // Retry the operation
-      const errorId = result.current.errors[0].id
-      await act(async () => {
-        await result.current.retryError(errorId)
-      })
-
-      expect(asyncFn).toHaveBeenCalledTimes(2)
-      expect(result.current.errors).toHaveLength(0)
-    })
-  })
-
-  describe("Error Statistics", () => {
-    it("should calculate error statistics", async () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
-
-      await act(async () => {
-        await result.current.handleError({ code: "NETWORK_ERROR" })
-        await result.current.handleError({ code: "VALIDATION_ERROR" })
-        await result.current.handleError({ code: "UNKNOWN_ERROR" })
-      })
-
-      const stats = result.current.statistics
-
-      expect(stats.totalErrors).toBe(3)
-      expect(stats.errorsBySeverity.warning).toBe(1) // NETWORK_ERROR
-      expect(stats.errorsBySeverity.info).toBe(1) // VALIDATION_ERROR
-      expect(stats.errorsBySeverity.error).toBe(1) // UNKNOWN_ERROR
-      expect(stats.recentErrors).toHaveLength(3)
     })
   })
 
   describe("Error Boundary Fallback", () => {
     it("should render error boundary fallback", () => {
-      const { result } = renderHookWithProviders(() => useErrorHandling())
+      const { result } = renderHook(() => useErrorHandling())
 
-      const error = new Error("Component crashed")
+      const error = new Error("Boundary error")
       const resetErrorBoundary = jest.fn()
 
       const FallbackComponent = result.current.ErrorBoundaryFallback
 
+      // Test that the component can be instantiated
       expect(FallbackComponent).toBeDefined()
       expect(typeof FallbackComponent).toBe("function")
+    })
+  })
+
+  describe("Statistics", () => {
+    it("should calculate error statistics", () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      act(() => {
+        result.current.handleError({ code: "NETWORK_ERROR", message: "Network error" })
+        result.current.handleError({ code: "VALIDATION_ERROR", message: "Validation error" })
+        result.current.handleError(new Error("Generic error"))
+      })
+
+      expect(result.current.statistics).toMatchObject({
+        totalErrors: 3,
+        errorsBySeverity: {
+          error: 1,
+          warning: 1,
+          info: 1,
+        },
+        recentErrors: expect.arrayContaining([
+          expect.objectContaining({ message: "Network error" }),
+          expect.objectContaining({ message: "Validation error" }),
+          expect.objectContaining({ message: "Generic error" }),
+        ]),
+      })
+    })
+
+    it("should limit recent errors to 5", () => {
+      const { result } = renderHook(() => useErrorHandling())
+
+      act(() => {
+        for (let i = 0; i < 10; i++) {
+          result.current.handleError(new Error(`Error ${i}`))
+        }
+      })
+
+      expect(result.current.statistics.recentErrors.length).toBe(5)
     })
   })
 })

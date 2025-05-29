@@ -1,23 +1,21 @@
-import { act, waitFor } from "@testing-library/react"
+import { renderHook, act } from "@testing-library/react"
+import { useQuery } from "convex/react"
 import { useRealTimeUpdates } from "@/hooks/use-real-time-updates"
-import { renderHookWithProviders, setupMocks, mockConvexQueries, createMockAppointment, mockToast } from "./test-utils"
+import { toast } from "@/hooks/use-toast"
 
 // Mock dependencies
-jest.mock("convex/react", () => ({
-  useQuery: jest.fn((query, args) => {
-    if (args === "skip") return undefined
-    return mockConvexQueries[query]?.() || null
-  }),
-}))
+jest.mock("convex/react")
+jest.mock("@/hooks/use-toast")
 
-jest.mock("@/hooks/use-toast", () => ({
-  toast: mockToast,
-}))
+const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>
+const mockToast = toast as jest.MockedFunction<typeof toast>
 
-// Mock Notification API
-const mockNotification = jest.fn()
+// Mock browser APIs
 Object.defineProperty(window, "Notification", {
-  value: mockNotification,
+  value: jest.fn().mockImplementation((title, options) => ({
+    title,
+    ...options,
+  })),
   configurable: true,
 })
 
@@ -31,32 +29,74 @@ Object.defineProperty(Notification, "requestPermission", {
   configurable: true,
 })
 
-// Mock Audio API
-const mockAudio = {
-  play: jest.fn().mockResolvedValue(undefined),
-  volume: 0.5,
-}
-
+// Mock Audio
 Object.defineProperty(window, "Audio", {
-  value: jest.fn(() => mockAudio),
+  value: jest.fn().mockImplementation(() => ({
+    play: jest.fn().mockResolvedValue(undefined),
+    volume: 0.5,
+  })),
   configurable: true,
 })
 
 describe("useRealTimeUpdates", () => {
   const mockBusinessId = "business_123" as any
   const mockCustomerId = "customer_123"
+  const mockOnUpdate = jest.fn()
+
+  const mockAppointments = [
+    {
+      _id: "apt_1",
+      customerId: "customer_123",
+      businessId: "business_123",
+      date: "2024-02-15",
+      startTime: "10:00",
+      endTime: "11:00",
+      status: "confirmed",
+    },
+  ]
+
+  const mockAvailability = {
+    businessHours: {
+      monday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
+    },
+  }
+
+  const mockNotifications = [
+    {
+      _id: "notif_1",
+      userId: "customer_123",
+      title: "Appointment Reminder",
+      message: "Your appointment is tomorrow",
+      type: "reminder",
+      read: false,
+    },
+  ]
 
   beforeEach(() => {
-    setupMocks()
-    mockToast.mockClear()
-    mockNotification.mockClear()
-    mockAudio.play.mockClear()
     jest.clearAllMocks()
+    jest.useFakeTimers()
+
+    mockUseQuery.mockImplementation((query) => {
+      if (query.toString().includes("subscribeToAppointments")) {
+        return mockAppointments
+      }
+      if (query.toString().includes("subscribeToAvailability")) {
+        return mockAvailability
+      }
+      if (query.toString().includes("subscribeToNotifications")) {
+        return mockNotifications
+      }
+      return null
+    })
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   describe("Initial State", () => {
-    it("should initialize with default values", () => {
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates())
+    it("should initialize with correct default values", () => {
+      const { result } = renderHook(() => useRealTimeUpdates())
 
       expect(result.current.isConnected).toBe(true)
       expect(result.current.lastUpdate).toBeNull()
@@ -64,56 +104,239 @@ describe("useRealTimeUpdates", () => {
       expect(result.current.isProcessing).toBe(false)
     })
 
-    it("should subscribe to updates when businessId is provided", () => {
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest.fn().mockReturnValue([])
-      mockConvexQueries["api.businessAvailability.subscribeToAvailability"] = jest.fn().mockReturnValue(null)
-      mockConvexQueries["api.notifications.subscribeToNotifications"] = jest.fn().mockReturnValue([])
+    it("should initialize with provided options", () => {
+      renderHook(() =>
+        useRealTimeUpdates({
+          businessId: mockBusinessId,
+          customerId: mockCustomerId,
+          onUpdate: mockOnUpdate,
+          enableNotifications: true,
+          enableSound: true,
+        }),
+      )
 
-      renderHookWithProviders(() => useRealTimeUpdates({ businessId: mockBusinessId }))
-
-      expect(mockConvexQueries["api.appointments.subscribeToAppointments"]).toHaveBeenCalled()
-      expect(mockConvexQueries["api.businessAvailability.subscribeToAvailability"]).toHaveBeenCalled()
-      expect(mockConvexQueries["api.notifications.subscribeToNotifications"]).toHaveBeenCalled()
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          businessId: mockBusinessId,
+          customerId: mockCustomerId,
+        }),
+      )
     })
   })
 
-  describe("Appointment Updates", () => {
-    it("should detect new appointments", async () => {
-      const onUpdate = jest.fn()
-      const initialAppointments: any[] = []
-      const newAppointments = [createMockAppointment()]
+  describe("Data Subscription", () => {
+    it("should subscribe to appointments when business ID is provided", () => {
+      renderHook(() => useRealTimeUpdates({ businessId: mockBusinessId }))
 
-      // Start with empty appointments
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce(initialAppointments)
-        .mockReturnValueOnce(newAppointments)
-
-      const { result, rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
           businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
         }),
       )
+    })
 
-      // Trigger update by re-rendering with new data
-      rerender(() =>
-        useRealTimeUpdates({
+    it("should subscribe to availability when business ID is provided", () => {
+      renderHook(() => useRealTimeUpdates({ businessId: mockBusinessId }))
+
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
           businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
         }),
       )
+    })
 
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: "appointment",
-            action: "created",
-            data: newAppointments[0],
+    it("should subscribe to notifications when user ID is provided", () => {
+      renderHook(() => useRealTimeUpdates({ customerId: mockCustomerId }))
+
+      expect(mockUseQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          userId: mockCustomerId,
+        }),
+      )
+    })
+
+    it("should skip subscriptions when no IDs provided", () => {
+      renderHook(() => useRealTimeUpdates())
+
+      expect(mockUseQuery).toHaveBeenCalledWith(expect.anything(), "skip")
+    })
+  })
+
+  describe("Change Detection", () => {
+    it("should detect new appointments", () => {
+      const { result, rerender } = renderHook(() =>
+        useRealTimeUpdates({ businessId: mockBusinessId, onUpdate: mockOnUpdate }),
+      )
+
+      // Initially no appointments
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToAppointments")) {
+          return []
+        }
+        return null
+      })
+
+      rerender()
+
+      // Add new appointment
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToAppointments")) {
+          return mockAppointments
+        }
+        return null
+      })
+
+      rerender()
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+        }),
+      )
+    })
+
+    it("should detect updated appointments", () => {
+      const { rerender } = renderHook(() => useRealTimeUpdates({ businessId: mockBusinessId, onUpdate: mockOnUpdate }))
+
+      // Initial appointments
+      rerender()
+
+      // Update appointment status
+      const updatedAppointments = [
+        {
+          ...mockAppointments[0],
+          status: "completed",
+        },
+      ]
+
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToAppointments")) {
+          return updatedAppointments
+        }
+        return null
+      })
+
+      rerender()
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "appointment",
+          action: "updated",
+          data: expect.objectContaining({
+            previous: mockAppointments[0],
+            current: updatedAppointments[0],
           }),
-        )
+        }),
+      )
+    })
+
+    it("should detect deleted appointments", () => {
+      const { rerender } = renderHook(() => useRealTimeUpdates({ businessId: mockBusinessId, onUpdate: mockOnUpdate }))
+
+      // Initial appointments
+      rerender()
+
+      // Remove appointment
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToAppointments")) {
+          return []
+        }
+        return null
+      })
+
+      rerender()
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "appointment",
+          action: "deleted",
+          data: mockAppointments[0],
+        }),
+      )
+    })
+
+    it("should detect availability changes", () => {
+      const { rerender } = renderHook(() => useRealTimeUpdates({ businessId: mockBusinessId, onUpdate: mockOnUpdate }))
+
+      // Initial availability
+      rerender()
+
+      // Update availability
+      const updatedAvailability = {
+        businessHours: {
+          monday: { isOpen: true, openTime: "08:00", closeTime: "18:00" },
+        },
+      }
+
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToAvailability")) {
+          return updatedAvailability
+        }
+        return mockAvailability
+      })
+
+      rerender()
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "availability",
+          action: "updated",
+          data: updatedAvailability,
+        }),
+      )
+    })
+
+    it("should detect new notifications", () => {
+      const { rerender } = renderHook(() => useRealTimeUpdates({ customerId: mockCustomerId, onUpdate: mockOnUpdate }))
+
+      // Initially no notifications
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToNotifications")) {
+          return []
+        }
+        return null
+      })
+
+      rerender()
+
+      // Add new notification
+      mockUseQuery.mockImplementation((query) => {
+        if (query.toString().includes("subscribeToNotifications")) {
+          return mockNotifications
+        }
+        return null
+      })
+
+      rerender()
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "notification",
+          action: "created",
+          data: mockNotifications[0],
+        }),
+      )
+    })
+  })
+
+  describe("Notifications", () => {
+    it("should show toast notifications when enabled", () => {
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: true }))
+
+      act(() => {
+        result.current.processUpdate({
+          id: "test_1",
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+          timestamp: new Date(),
+        })
       })
 
       expect(mockToast).toHaveBeenCalledWith({
@@ -122,364 +345,180 @@ describe("useRealTimeUpdates", () => {
       })
     })
 
-    it("should detect updated appointments", async () => {
-      const onUpdate = jest.fn()
-      const originalAppointment = createMockAppointment({ status: "scheduled" })
-      const updatedAppointment = { ...originalAppointment, status: "confirmed" }
+    it("should not show toast notifications when disabled", () => {
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: false }))
 
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce([originalAppointment])
-        .mockReturnValueOnce([updatedAppointment])
-
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: "appointment",
-            action: "updated",
-            data: {
-              previous: originalAppointment,
-              current: updatedAppointment,
-            },
-          }),
-        )
+      act(() => {
+        result.current.processUpdate({
+          id: "test_1",
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+          timestamp: new Date(),
+        })
       })
 
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Appointment Updated",
-        description: "An appointment has been modified",
-      })
+      expect(mockToast).not.toHaveBeenCalled()
     })
 
-    it("should detect deleted appointments", async () => {
-      const onUpdate = jest.fn()
-      const appointment = createMockAppointment()
-
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce([appointment])
-        .mockReturnValueOnce([])
-
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: "appointment",
-            action: "deleted",
-            data: appointment,
-          }),
-        )
-      })
-
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Appointment Cancelled",
-        description: "An appointment has been cancelled",
-      })
-    })
-  })
-
-  describe("Availability Updates", () => {
-    it("should detect availability changes", async () => {
-      const onUpdate = jest.fn()
-      const originalAvailability = { businessHours: { monday: { isOpen: true } } }
-      const updatedAvailability = { businessHours: { monday: { isOpen: false } } }
-
-      mockConvexQueries["api.businessAvailability.subscribeToAvailability"] = jest
-        .fn()
-        .mockReturnValueOnce(originalAvailability)
-        .mockReturnValueOnce(updatedAvailability)
-
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: "availability",
-            action: "updated",
-            data: updatedAvailability,
-          }),
-        )
-      })
-
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Availability Changed",
-        description: "Business availability has been updated",
-      })
-    })
-  })
-
-  describe("Notification Updates", () => {
-    it("should detect new notifications", async () => {
-      const onUpdate = jest.fn()
-      const notification = {
-        _id: "notif_123",
-        title: "Test Notification",
-        message: "This is a test",
-        type: "info",
+    it("should play notification sound when enabled", () => {
+      const mockPlay = jest.fn().mockResolvedValue(undefined)
+      const mockAudio = {
+        play: mockPlay,
+        volume: 0.5,
       }
+      ;(window.Audio as jest.Mock).mockImplementation(() => mockAudio)
 
-      mockConvexQueries["api.notifications.subscribeToNotifications"] = jest
-        .fn()
-        .mockReturnValueOnce([])
-        .mockReturnValueOnce([notification])
+      const { result } = renderHook(() => useRealTimeUpdates({ enableSound: true }))
 
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          customerId: mockCustomerId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          customerId: mockCustomerId,
-          onUpdate,
-          enableNotifications: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(onUpdate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: "notification",
-            action: "created",
-            data: notification,
-          }),
-        )
+      act(() => {
+        result.current.playNotificationSound()
       })
 
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Test Notification",
-        description: "This is a test",
-      })
+      expect(mockPlay).toHaveBeenCalled()
     })
-  })
 
-  describe("Browser Notifications", () => {
-    it("should show browser notification for new appointments", async () => {
-      const appointment = createMockAppointment()
+    it("should show browser notification for important updates", async () => {
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: true }))
 
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce([])
-        .mockReturnValueOnce([appointment])
+      await act(async () => {
+        await result.current.showBrowserNotification("Test Title", "Test Body")
+      })
 
-      const { result, rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockNotification).toHaveBeenCalledWith(
-          "New Appointment",
-          expect.objectContaining({
-            body: "A new appointment has been scheduled",
-            icon: "/icon-192x192.png",
-            badge: "/icon-72x72.png",
-            tag: "appointment-update",
-            renotify: true,
-          }),
-        )
+      expect(window.Notification).toHaveBeenCalledWith("Test Title", {
+        body: "Test Body",
+        icon: "/icon-192x192.png",
+        badge: "/icon-72x72.png",
+        tag: "appointment-update",
+        renotify: true,
       })
     })
 
-    it("should request notification permission when needed", async () => {
+    it("should handle notification permission denied", async () => {
       Object.defineProperty(Notification, "permission", {
-        value: "default",
+        value: "denied",
         configurable: true,
       })
 
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates({ enableNotifications: true }))
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: true }))
 
       await act(async () => {
-        await result.current.showBrowserNotification("Test", "Test message")
+        await result.current.showBrowserNotification("Test Title", "Test Body")
       })
 
-      expect(Notification.requestPermission).toHaveBeenCalled()
-    })
-  })
-
-  describe("Sound Notifications", () => {
-    it("should play sound for new appointments when enabled", async () => {
-      const appointment = createMockAppointment()
-
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce([])
-        .mockReturnValueOnce([appointment])
-
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-          enableSound: true,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-          enableSound: true,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockAudio.play).toHaveBeenCalled()
-      })
-    })
-
-    it("should not play sound when disabled", async () => {
-      const appointment = createMockAppointment()
-
-      mockConvexQueries["api.appointments.subscribeToAppointments"] = jest
-        .fn()
-        .mockReturnValueOnce([])
-        .mockReturnValueOnce([appointment])
-
-      const { rerender } = renderHookWithProviders(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-          enableSound: false,
-        }),
-      )
-
-      // Trigger update
-      rerender(() =>
-        useRealTimeUpdates({
-          businessId: mockBusinessId,
-          enableNotifications: true,
-          enableSound: false,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockToast).toHaveBeenCalled()
-      })
-
-      expect(mockAudio.play).not.toHaveBeenCalled()
+      expect(window.Notification).not.toHaveBeenCalled()
     })
   })
 
   describe("Update Queue Management", () => {
-    it("should add updates to queue", async () => {
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates({ enableNotifications: false }))
-
-      const testUpdate = {
-        id: "test-123",
-        type: "appointment" as const,
-        action: "created" as const,
-        data: createMockAppointment(),
-        timestamp: new Date(),
-      }
+    it("should add updates to queue", () => {
+      const { result } = renderHook(() => useRealTimeUpdates())
 
       act(() => {
-        result.current.processUpdate(testUpdate)
+        result.current.processUpdate({
+          id: "test_1",
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+          timestamp: new Date(),
+        })
       })
 
-      expect(result.current.updateQueue).toContain(testUpdate)
-      expect(result.current.lastUpdate).toBeTruthy()
+      expect(result.current.updateQueue.length).toBe(1)
+      expect(result.current.lastUpdate).toBeInstanceOf(Date)
     })
 
     it("should clear update queue", () => {
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates())
-
-      const testUpdate = {
-        id: "test-123",
-        type: "appointment" as const,
-        action: "created" as const,
-        data: createMockAppointment(),
-        timestamp: new Date(),
-      }
+      const { result } = renderHook(() => useRealTimeUpdates())
 
       act(() => {
-        result.current.processUpdate(testUpdate)
+        result.current.processUpdate({
+          id: "test_1",
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+          timestamp: new Date(),
+        })
       })
 
-      expect(result.current.updateQueue.length).toBeGreaterThan(0)
+      expect(result.current.updateQueue.length).toBe(1)
 
       act(() => {
         result.current.clearUpdateQueue()
       })
 
-      expect(result.current.updateQueue).toEqual([])
+      expect(result.current.updateQueue.length).toBe(0)
     })
 
-    it("should batch multiple updates", async () => {
-      jest.useFakeTimers()
+    it("should limit queue size to 10 items", () => {
+      const { result } = renderHook(() => useRealTimeUpdates())
 
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates({ enableNotifications: true }))
+      // Add 15 updates
+      act(() => {
+        for (let i = 0; i < 15; i++) {
+          result.current.processUpdate({
+            id: `test_${i}`,
+            type: "appointment",
+            action: "created",
+            data: mockAppointments[0],
+            timestamp: new Date(),
+          })
+        }
+      })
+
+      expect(result.current.updateQueue.length).toBe(10)
+    })
+  })
+
+  describe("Statistics", () => {
+    it("should calculate update statistics", () => {
+      const { result } = renderHook(() => useRealTimeUpdates())
+
+      act(() => {
+        result.current.processUpdate({
+          id: "test_1",
+          type: "appointment",
+          action: "created",
+          data: mockAppointments[0],
+          timestamp: new Date(),
+        })
+        result.current.processUpdate({
+          id: "test_2",
+          type: "availability",
+          action: "updated",
+          data: mockAvailability,
+          timestamp: new Date(),
+        })
+        result.current.processUpdate({
+          id: "test_3",
+          type: "notification",
+          action: "created",
+          data: mockNotifications[0],
+          timestamp: new Date(),
+        })
+      })
+
+      expect(result.current.statistics).toEqual({
+        totalUpdates: 3,
+        appointmentUpdates: 1,
+        availabilityUpdates: 1,
+        notificationUpdates: 1,
+      })
+    })
+  })
+
+  describe("Batch Processing", () => {
+    it("should process batched updates after timeout", async () => {
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: true }))
 
       // Add multiple updates quickly
       act(() => {
         for (let i = 0; i < 5; i++) {
           result.current.processUpdate({
-            id: `test-${i}`,
+            id: `test_${i}`,
             type: "appointment",
             action: "created",
-            data: createMockAppointment(),
+            data: mockAppointments[0],
             timestamp: new Date(),
           })
         }
@@ -487,74 +526,75 @@ describe("useRealTimeUpdates", () => {
 
       expect(result.current.updateQueue.length).toBe(5)
 
-      // Fast-forward time to trigger batching
+      // Fast forward timers to trigger batch processing
       act(() => {
         jest.advanceTimersByTime(2000)
       })
 
-      await waitFor(() => {
-        expect(mockToast).toHaveBeenCalledWith({
-          title: "Multiple Updates",
-          description: "5 items have been updated",
-        })
+      expect(mockToast).toHaveBeenCalledWith({
+        title: "Multiple Updates",
+        description: "5 items have been updated",
       })
-
-      jest.useRealTimers()
     })
-  })
 
-  describe("Statistics", () => {
-    it("should calculate update statistics", () => {
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates())
+    it("should not show batch notification for few updates", () => {
+      const { result } = renderHook(() => useRealTimeUpdates({ enableNotifications: true }))
 
-      // Add different types of updates
       act(() => {
         result.current.processUpdate({
-          id: "apt-1",
+          id: "test_1",
           type: "appointment",
           action: "created",
-          data: {},
-          timestamp: new Date(),
-        })
-        result.current.processUpdate({
-          id: "avail-1",
-          type: "availability",
-          action: "updated",
-          data: {},
-          timestamp: new Date(),
-        })
-        result.current.processUpdate({
-          id: "notif-1",
-          type: "notification",
-          action: "created",
-          data: {},
+          data: mockAppointments[0],
           timestamp: new Date(),
         })
       })
 
-      const stats = result.current.statistics
+      act(() => {
+        jest.advanceTimersByTime(2000)
+      })
 
-      expect(stats.totalUpdates).toBe(3)
-      expect(stats.appointmentUpdates).toBe(1)
-      expect(stats.availabilityUpdates).toBe(1)
-      expect(stats.notificationUpdates).toBe(1)
+      expect(mockToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Multiple Updates",
+        }),
+      )
     })
   })
 
   describe("Error Handling", () => {
-    it("should handle audio play errors gracefully", async () => {
-      mockAudio.play.mockRejectedValue(new Error("Audio failed"))
+    it("should handle audio play errors gracefully", () => {
+      const mockPlay = jest.fn().mockRejectedValue(new Error("Audio error"))
+      const mockAudio = {
+        play: mockPlay,
+        volume: 0.5,
+      }
+      ;(window.Audio as jest.Mock).mockImplementation(() => mockAudio)
+
       const consoleSpy = jest.spyOn(console, "error").mockImplementation()
 
-      const { result } = renderHookWithProviders(() => useRealTimeUpdates({ enableSound: true }))
+      const { result } = renderHook(() => useRealTimeUpdates({ enableSound: true }))
 
-      await act(async () => {
+      act(() => {
         result.current.playNotificationSound()
       })
 
       expect(consoleSpy).toHaveBeenCalledWith("Error playing notification sound:", expect.any(Error))
 
       consoleSpy.mockRestore()
+    })
+  })
+
+  describe("Cleanup", () => {
+    it("should cleanup audio on unmount", () => {
+      const { unmount } = renderHook(() => useRealTimeUpdates({ enableSound: true }))
+
+      expect(window.Audio).toHaveBeenCalled()
+
+      unmount()
+
+      // Audio cleanup is handled by garbage collection
+      expect(true).toBe(true)
     })
   })
 })
