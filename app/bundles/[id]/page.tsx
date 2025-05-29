@@ -20,10 +20,7 @@ export default function BundleDetailPage() {
   const bundle = useQuery(api.serviceBundles.getBundleById, { bundleId })
 
   // Calculate savings
-  const savings = useQuery(
-    api.serviceBundles.calculateBundleSavings,
-    bundle ? { bundleId } : "skip"
-  )
+  const savings = useQuery(api.serviceBundles.calculateBundleSavings, bundle ? { bundleId } : "skip")
 
   // Loading state
   if (!bundle || !savings) {
@@ -75,9 +72,7 @@ export default function BundleDetailPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-2xl">{bundle.name}</CardTitle>
-                  <CardDescription className="text-base mt-2">
-                    {bundle.description}
-                  </CardDescription>
+                  <CardDescription className="text-base mt-2">{bundle.description}</CardDescription>
                 </div>
                 <Badge variant="outline" className="text-lg">
                   <Package className="h-4 w-4 mr-1" />
@@ -91,9 +86,7 @@ export default function BundleDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>What's Included</CardTitle>
-              <CardDescription>
-                All services included in this bundle package
-              </CardDescription>
+              <CardDescription>All services included in this bundle package</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -104,13 +97,9 @@ export default function BundleDetailPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium">{service.name}</h4>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {service.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-sm">
-                        <span className="text-muted-foreground">
-                          Regular Price: ${service.price.toFixed(2)}
-                        </span>
+                        <span className="text-muted-foreground">Regular Price: ${service.price.toFixed(2)}</span>
                         <span className="text-muted-foreground">
                           <Clock className="h-3 w-3 inline mr-1" />
                           {service.duration} min
@@ -133,25 +122,19 @@ export default function BundleDetailPage() {
                 {bundle.validFrom && (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>
-                      Valid from: {format(new Date(bundle.validFrom), "MMMM d, yyyy")}
-                    </span>
+                    <span>Valid from: {format(new Date(bundle.validFrom), "MMMM d, yyyy")}</span>
                   </div>
                 )}
                 {bundle.validUntil && (
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>
-                      Valid until: {format(new Date(bundle.validUntil), "MMMM d, yyyy")}
-                    </span>
+                    <span>Valid until: {format(new Date(bundle.validUntil), "MMMM d, yyyy")}</span>
                   </div>
                 )}
                 {bundle.maxRedemptions && (
                   <div className="flex items-center text-sm">
                     <AlertCircle className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>
-                      Limited availability: {bundle.maxRedemptions - bundle.currentRedemptions} remaining
-                    </span>
+                    <span>Limited availability: {bundle.maxRedemptions - bundle.currentRedemptions} remaining</span>
                   </div>
                 )}
               </CardContent>
@@ -170,9 +153,7 @@ export default function BundleDetailPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Original Price:</span>
-                  <span className="line-through text-muted-foreground">
-                    ${savings.originalPrice.toFixed(2)}
-                  </span>
+                  <span className="line-through text-muted-foreground">${savings.originalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Discount:</span>
@@ -190,9 +171,7 @@ export default function BundleDetailPage() {
 
               <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-green-800 dark:text-green-200">
-                    You Save:
-                  </span>
+                  <span className="text-sm font-medium text-green-800 dark:text-green-200">You Save:</span>
                   <span className="text-lg font-bold text-green-800 dark:text-green-200">
                     ${savings.savings.toFixed(2)} ({savings.savingsPercentage}%)
                   </span>
@@ -213,4 +192,68 @@ export default function BundleDetailPage() {
                 <div className="text-center">
                   <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
                   <h3 className="font-medium text-lg mb-1">Bundle Expired</h3>
-                  <p\
+                  <p className="text-sm text-muted-foreground">
+                    This bundle offer has expired and is no longer available for booking.
+                  </p>
+                  <Button variant="outline" className="mt-4" asChild>
+                    <Link href="/services">Explore Other Services</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : isSoldOut ? (
+            <Card className="border-destructive">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-2" />
+                  <h3 className="font-medium text-lg mb-1">Bundle Sold Out</h3>
+                  <p className="text-sm text-muted-foreground">
+                    This bundle offer is fully redeemed and no longer available.
+                  </p>
+                  <Button variant="outline" className="mt-4" asChild>
+                    <Link href="/services">Explore Other Services</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : isNotStarted ? (
+            <Card className="border-primary">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <Calendar className="h-12 w-12 text-primary mx-auto mb-2" />
+                  <h3 className="font-medium text-lg mb-1">Bundle Not Yet Active</h3>
+                  <p className="text-sm text-muted-foreground">
+                    This bundle offer will be available from {format(new Date(bundle.validFrom!), "MMMM d, yyyy")}.
+                  </p>
+                  <Button variant="outline" className="mt-4" asChild>
+                    <Link href="/services">Explore Other Services</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Book This Bundle</CardTitle>
+                <CardDescription>Schedule your appointment for this amazing package deal.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* TODO: Integrate with a bundle-specific booking form or process */}
+                <Button className="w-full" size="lg" asChild>
+                  {/* This should link to a booking page that can handle bundles */}
+                  <Link href={`/book?bundleId=${bundle._id}`}>
+                    <Calendar className="mr-2 h-5 w-5" />
+                    Book Bundle Now
+                  </Link>
+                </Button>
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  You'll be able to select your preferred date and time on the next page.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
