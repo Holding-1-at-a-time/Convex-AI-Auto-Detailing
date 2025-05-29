@@ -1,204 +1,283 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "convex/react"
-import { api } from "@/convex/_generated/api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Mail, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
+import { Mail, MessageSquare, Bell, CheckCircle, XCircle, Clock, TrendingUp, Users, Calendar } from "lucide-react"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
 
 interface NotificationDashboardProps {
-  userId?: string
-  businessId?: string
+  businessId: Id<"businessProfiles">
 }
 
-export function NotificationDashboard({ userId, businessId }: NotificationDashboardProps) {
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [methodFilter, setMethodFilter] = useState<string>("all")
+export function NotificationDashboard({ businessId }: NotificationDashboardProps) {
+  const [selectedPeriod, setSelectedPeriod] = useState("7d")
 
-  const notificationLogs = useQuery(api.notifications.getNotificationLogs, {
-    userId,
+  const notificationStats = useQuery(api.notifications.getNotificationStats, {
     businessId,
-    status: statusFilter === "all" ? undefined : statusFilter,
-    method: methodFilter === "all" ? undefined : (methodFilter as "email" | "sms"),
-    limit: 100,
+    period: selectedPeriod,
   })
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "sent":
-      case "delivered":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case "failed":
-        return <XCircle className="h-4 w-4 text-red-500" />
-      case "queued":
-        return <Clock className="h-4 w-4 text-yellow-500" />
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />
-    }
+  const recentNotifications = useQuery(api.notifications.getRecentNotifications, {
+    businessId,
+    limit: 10,
+  })
+
+  const emailStatus = useQuery(api.businessProfiles.getGmailStatus, { businessId })
+
+  if (!notificationStats || !recentNotifications) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
   }
 
-  const getMethodIcon = (method: string) => {
-    switch (method) {
-      case "email":
-        return <Mail className="h-4 w-4" />
-      case "sms":
-        return <MessageSquare className="h-4 w-4" />
-      default:
-        return null
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "sent":
-      case "delivered":
-        return "bg-green-100 text-green-800"
-      case "failed":
-        return "bg-red-100 text-red-800"
-      case "queued":
-        return "bg-yellow-100 text-yellow-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const stats = notificationLogs?.reduce(
-    (acc, log) => {
-      acc.total++
-      acc[log.status as keyof typeof acc]++
-      if (log.method === "email") acc.email++
-      if (log.method === "sms") acc.sms++
-      return acc
-    },
-    { total: 0, sent: 0, failed: 0, queued: 0, delivered: 0, email: 0, sms: 0 },
-  ) || { total: 0, sent: 0, failed: 0, queued: 0, delivered: 0, email: 0, sms: 0 }
+  const deliveryRate = notificationStats.total > 0 ? (notificationStats.delivered / notificationStats.total) * 100 : 0
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Notification Dashboard</h2>
+          <p className="text-gray-600">Monitor your notification delivery and engagement</p>
+        </div>
+        <div className="flex gap-2">
+          {["24h", "7d", "30d", "90d"].map((period) => (
+            <Button
+              key={period}
+              variant={selectedPeriod === period ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedPeriod(period)}
+            >
+              {period}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Service Status */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <Mail className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-sm font-medium text-gray-600">Email Service</p>
+                <div className="flex items-center gap-2">
+                  {emailStatus?.connected ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-green-600">Connected</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 text-red-600" />
+                      <span className="text-sm text-red-600">Not Connected</span>
+                    </>
+                  )}
+                </div>
               </div>
-              <RefreshCw className="h-4 w-4 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <MessageSquare className="h-8 w-8 text-green-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Sent</p>
-                <p className="text-2xl font-bold text-green-600">{stats.sent + stats.delivered}</p>
+                <p className="text-sm font-medium text-gray-600">SMS Service</p>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-600">Active</span>
+                </div>
               </div>
-              <CheckCircle className="h-4 w-4 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="h-8 w-8 text-purple-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Failed</p>
-                <p className="text-2xl font-bold text-red-600">{stats.failed}</p>
+                <p className="text-sm font-medium text-gray-600">Delivery Rate</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold">{deliveryRate.toFixed(1)}%</span>
+                  <Progress value={deliveryRate} className="w-16 h-2" />
+                </div>
               </div>
-              <XCircle className="h-4 w-4 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Queued</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.queued}</p>
-              </div>
-              <Clock className="h-4 w-4 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters and Logs */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Notification Logs</CardTitle>
-          <CardDescription>Track all notification attempts and their delivery status</CardDescription>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Bell className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{notificationStats.total}</p>
+            <p className="text-sm text-gray-600">Total Sent</p>
+          </CardContent>
+        </Card>
 
-          <div className="flex gap-4">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="queued">Queued</SelectItem>
-              </SelectContent>
-            </Select>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{notificationStats.delivered}</p>
+            <p className="text-sm text-gray-600">Delivered</p>
+          </CardContent>
+        </Card>
 
-            <Select value={methodFilter} onValueChange={setMethodFilter}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="Filter by method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Methods</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="sms">SMS</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{notificationStats.sent - notificationStats.delivered}</p>
+            <p className="text-sm text-gray-600">Pending</p>
+          </CardContent>
+        </Card>
 
-        <CardContent>
-          <div className="space-y-4">
-            {notificationLogs?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No notifications found</div>
-            ) : (
-              notificationLogs?.map((log) => (
-                <div
-                  key={log._id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      {getMethodIcon(log.method)}
-                      {getStatusIcon(log.status)}
-                    </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{notificationStats.failed}</p>
+            <p className="text-sm text-gray-600">Failed</p>
+          </CardContent>
+        </Card>
+      </div>
 
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">{log.type.replace(/_/g, " ")}</span>
-                        <Badge className={getStatusColor(log.status)}>{log.status}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">To: {log.recipient}</p>
-                      {log.errorMessage && <p className="text-sm text-red-600">Error: {log.errorMessage}</p>}
-                    </div>
+      {/* Detailed Analytics */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="by-type">By Type</TabsTrigger>
+          <TabsTrigger value="by-channel">By Channel</TabsTrigger>
+          <TabsTrigger value="recent">Recent Activity</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Performance</CardTitle>
+              <CardDescription>Delivery rates and engagement metrics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Overall Delivery Rate</span>
+                  <span className="text-sm text-gray-600">{deliveryRate.toFixed(1)}%</span>
+                </div>
+                <Progress value={deliveryRate} className="h-2" />
+
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{notificationStats.delivered}</p>
+                    <p className="text-sm text-green-700">Successfully Delivered</p>
                   </div>
-
-                  <div className="text-right text-sm text-muted-foreground">
-                    <p>{formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}</p>
-                    {log.sentAt && <p>Sent: {formatDistanceToNow(new Date(log.sentAt), { addSuffix: true })}</p>}
-                    {log.retryCount > 0 && <p className="text-yellow-600">Retries: {log.retryCount}</p>}
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">{notificationStats.failed}</p>
+                    <p className="text-sm text-red-700">Failed Deliveries</p>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="by-type" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notifications by Type</CardTitle>
+              <CardDescription>Breakdown of notification types sent</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Object.entries(notificationStats.byType).map(([type, count]) => (
+                  <div key={type} className="flex items-center justify-between">
+                    <span className="text-sm font-medium capitalize">{type.replace("_", " ")}</span>
+                    <Badge variant="secondary">{count}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="by-channel" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notifications by Channel</CardTitle>
+              <CardDescription>Distribution across email and SMS</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Object.entries(notificationStats.byChannel).map(([channel, count]) => (
+                  <div key={channel} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {channel === "email" ? (
+                        <Mail className="h-4 w-4 text-blue-600" />
+                      ) : (
+                        <MessageSquare className="h-4 w-4 text-green-600" />
+                      )}
+                      <span className="text-sm font-medium capitalize">{channel}</span>
+                    </div>
+                    <Badge variant="secondary">{count}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recent" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Notifications</CardTitle>
+              <CardDescription>Latest notification activity</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentNotifications.map((notification) => (
+                  <div key={notification._id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      {notification.type === "appointment_confirmation" && (
+                        <Calendar className="h-4 w-4 text-blue-600" />
+                      )}
+                      {notification.type === "appointment_reminder" && <Clock className="h-4 w-4 text-yellow-600" />}
+                      {notification.type === "appointment_cancelled" && <XCircle className="h-4 w-4 text-red-600" />}
+                      {notification.type === "feedback_request" && <Users className="h-4 w-4 text-green-600" />}
+                      <div>
+                        <p className="text-sm font-medium">{notification.title}</p>
+                        <p className="text-xs text-gray-600">{new Date(notification.createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <Badge variant={notification.read ? "secondary" : "default"}>
+                      {notification.read ? "Read" : "Unread"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

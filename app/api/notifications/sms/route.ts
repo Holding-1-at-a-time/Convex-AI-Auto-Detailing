@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sendSms, validateTwilioConnection } from "@/lib/twilio-service"
+import { sendSMS, validateTwilioConnection } from "@/lib/twilio-service"
 import { NOTIFICATION_TEMPLATES, renderTemplate } from "@/lib/notification-templates"
 import { auth } from "@clerk/nextjs/server"
 
@@ -25,12 +25,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Render SMS content
-    const body = renderTemplate(template.smsTemplate, data)
+    const message = renderTemplate(template.smsTemplate, data)
 
     // Send SMS
-    const success = await sendSms({
+    const success = await sendSMS({
       to,
-      body,
+      message,
     })
 
     if (success) {

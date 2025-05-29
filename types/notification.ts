@@ -2,13 +2,20 @@ export interface NotificationPreferences {
   email: boolean
   sms: boolean
   push: boolean
+  quietHoursStart?: string // "22:00"
+  quietHoursEnd?: string // "08:00"
+  timezone?: string
   reminderTiming: {
-    days: number[]
-    hours: number[]
+    appointment: number // hours before appointment
+    followUp: number // hours after appointment
   }
-  quietHours: {
-    start: string // HH:MM format
-    end: string // HH:MM format
+  notificationTypes: {
+    confirmations: boolean
+    reminders: boolean
+    cancellations: boolean
+    rescheduling: boolean
+    marketing: boolean
+    feedback: boolean
   }
 }
 
@@ -28,37 +35,66 @@ export interface NotificationTemplate {
 export interface NotificationData {
   customerName: string
   businessName: string
+  businessPhone: string
+  businessEmail: string
+  businessAddress?: string
   serviceType: string
-  date: string
-  startTime: string
-  endTime: string
-  price: number
-  appointmentId: string
+  appointmentDate: string
+  appointmentTime: string
+  duration?: string
+  price?: string
   vehicleInfo?: string
-  bundleName?: string
-  confirmationUrl?: string
-  rescheduleUrl?: string
-  cancelUrl?: string
-  reason?: string
-  newDate?: string
-  newStartTime?: string
-  newEndTime?: string
+  location?: string
+  cancellationReason?: string
+  refundAmount?: string
+  rescheduleReason?: string
+  originalDate?: string
+  originalTime?: string
+  rescheduleLink?: string
+  cancelLink?: string
+  rebookLink?: string
+  feedbackLink?: string
+}
+
+export interface NotificationRequest {
+  type:
+    | "appointment_confirmation"
+    | "appointment_reminder"
+    | "appointment_cancelled"
+    | "appointment_rescheduled"
+    | "feedback_request"
+  recipient: {
+    email?: string
+    phone?: string
+    name: string
+    preferences?: NotificationPreferences
+  }
+  data: NotificationData
+  businessId: string
+  appointmentId?: string
+  scheduledFor?: string // ISO date string for scheduled notifications
+  priority?: "low" | "medium" | "high" | "urgent"
 }
 
 export interface NotificationLog {
-  _id: string
+  id: string
   type: string
   recipient: string
-  method: "email" | "sms"
-  status: "queued" | "sent" | "failed" | "delivered"
-  appointmentId?: string
-  businessId?: string
-  customerId?: string
-  subject?: string
-  body: string
+  channel: "email" | "sms" | "push"
+  status: "pending" | "sent" | "delivered" | "failed" | "bounced"
   sentAt?: string
   deliveredAt?: string
   errorMessage?: string
-  retryCount: number
-  createdAt: string
+  businessId: string
+  appointmentId?: string
+}
+
+export interface NotificationStats {
+  total: number
+  sent: number
+  delivered: number
+  failed: number
+  deliveryRate: number
+  byType: Record<string, number>
+  byChannel: Record<string, number>
 }
