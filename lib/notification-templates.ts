@@ -1,188 +1,184 @@
-import type { NotificationTemplate } from "./notification-providers/types"
+import type { NotificationTemplate, NotificationData } from "@/types/notification"
 
-export const notificationTemplates: Record<string, NotificationTemplate> = {
-  appointment_confirmation: {
-    subject: "Appointment Confirmed - {{businessName}}",
-    html: `
+export const NOTIFICATION_TEMPLATES: Record<string, NotificationTemplate> = {
+  booking_confirmation: {
+    type: "booking_confirmation",
+    subject: "Booking Confirmed - {{businessName}}",
+    emailTemplate: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Appointment Confirmed!</h1>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px;">Booking Confirmed!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your auto detailing appointment is all set</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Hi {{customerName}},</p>
-          
-          <p style="color: #666; line-height: 1.6;">Your auto detailing appointment has been confirmed! We're excited to service {{vehicleInfo}} and make it shine like new.</p>
-          
-          <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #28a745;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 20px;">{{serviceType}}</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <p style="margin: 5px 0;"><strong>Date:</strong> {{date}}</p>
-              <p style="margin: 5px 0;"><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
-              <p style="margin: 5px 0;"><strong>Location:</strong> {{businessName}}</p>
-              <p style="margin: 5px 0;"><strong>Price:</strong> ${{ price }}</p>
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+          <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #333; margin: 0 0 20px 0; font-size: 22px;">Appointment Details</h2>
+            
+            <div style="border-left: 4px solid #16a34a; padding-left: 20px; margin: 20px 0;">
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Service:</strong> {{serviceType}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Date:</strong> {{date}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Location:</strong> {{businessName}}</p>
+              {{#if vehicleInfo}}<p style="margin: 5px 0; font-size: 16px;"><strong>Vehicle:</strong> {{vehicleInfo}}</p>{{/if}}
+              {{#if bundleName}}<p style="margin: 5px 0; font-size: 16px;"><strong>Package:</strong> {{bundleName}}</p>{{/if}}
+              <p style="margin: 5px 0; font-size: 18px; color: #16a34a;"><strong>Total: ${{ price }}</strong></p>
             </div>
-            {{#bundleName}}
-            <p style="margin: 10px 0 5px 0;"><strong>Bundle:</strong> {{bundleName}}</p>
-            {{/bundleName}}
-            <p style="margin: 15px 0 5px 0; font-size: 14px; color: #666;"><strong>Confirmation #:</strong> {{appointmentId}}</p>
+            
+            <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <p style="margin: 0; color: #0277bd; font-size: 14px;">
+                <strong>Confirmation #:</strong> {{appointmentId}}
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              {{#if confirmationUrl}}
+              <a href="{{confirmationUrl}}" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px;">View Details</a>
+              {{/if}}
+              {{#if rescheduleUrl}}
+              <a href="{{rescheduleUrl}}" style="background: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px;">Reschedule</a>
+              {{/if}}
+            </div>
+            
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+              <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                We'll send you a reminder 24 hours before your appointment. Please ensure your vehicle is accessible and ready for service.
+              </p>
+            </div>
           </div>
-          
-          <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="color: #1976d2; margin: 0 0 10px 0;">What to expect:</h4>
-            <ul style="color: #666; line-height: 1.6; margin: 0; padding-left: 20px;">
-              <li>Our team will arrive at the scheduled time</li>
-              <li>Please ensure your vehicle is accessible</li>
-              <li>We'll send you a reminder 24 hours before your appointment</li>
-            </ul>
-          </div>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            {{#confirmationUrl}}
-            <a href="{{confirmationUrl}}" style="background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">Manage Booking</a>
-            {{/confirmationUrl}}
-            {{#rescheduleUrl}}
-            <a href="{{rescheduleUrl}}" style="background: #ffc107; color: #212529; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">Reschedule</a>
-            {{/rescheduleUrl}}
-          </div>
-          
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">Need to make changes? Contact us at least 24 hours in advance to avoid any cancellation fees.</p>
-          
-          <p style="color: #333; margin-top: 25px;">Thank you for choosing {{businessName}}!</p>
+        </div>
+        
+        <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
+          <p>Thank you for choosing {{businessName}}!</p>
         </div>
       </div>
     `,
-    sms: "Hi {{customerName}}! Your {{serviceType}} appointment is confirmed for {{date}} at {{startTime}} with {{businessName}}. Total: ${{price}}. We'll send a reminder 24hrs before. Confirmation #{{appointmentId}}",
+    smsTemplate:
+      "Booking confirmed! {{serviceType}} on {{date}} at {{startTime}} with {{businessName}}. Confirmation #{{appointmentId}}. Total: ${{price}}. We'll send a reminder 24hrs before.",
   },
 
-  appointment_reminder: {
-    subject: "Reminder: Your Auto Detailing Appointment Tomorrow",
-    html: `
+  booking_reminder: {
+    type: "booking_reminder",
+    subject: "Reminder: Your appointment is tomorrow - {{businessName}}",
+    emailTemplate: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Appointment Reminder</h1>
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px;">Appointment Reminder</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your auto detailing appointment is tomorrow</p>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Hi {{customerName}},</p>
-          
-          <p style="color: #666; line-height: 1.6;">This is a friendly reminder about your upcoming auto detailing appointment tomorrow!</p>
-          
-          <div style="background: #fff3cd; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ffc107;">
-            <h3 style="color: #856404; margin: 0 0 15px 0; font-size: 20px;">{{serviceType}}</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <p style="margin: 5px 0;"><strong>Date:</strong> {{date}}</p>
-              <p style="margin: 5px 0;"><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
-              <p style="margin: 5px 0;"><strong>Location:</strong> {{businessName}}</p>
-              <p style="margin: 5px 0;"><strong>Vehicle:</strong> {{vehicleInfo}}</p>
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+          <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #333; margin: 0 0 20px 0; font-size: 22px;">Tomorrow's Appointment</h2>
+            
+            <div style="border-left: 4px solid #f59e0b; padding-left: 20px; margin: 20px 0;">
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Service:</strong> {{serviceType}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Date:</strong> {{date}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Location:</strong> {{businessName}}</p>
+              {{#if vehicleInfo}}<p style="margin: 5px 0; font-size: 16px;"><strong>Vehicle:</strong> {{vehicleInfo}}</p>{{/if}}
+            </div>
+            
+            <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #92400e;">Preparation Checklist:</h3>
+              <ul style="margin: 0; padding-left: 20px; color: #92400e;">
+                <li>Ensure your vehicle is accessible</li>
+                <li>Remove personal items from the car</li>
+                <li>Have your keys ready</li>
+              </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              {{#if rescheduleUrl}}
+              <a href="{{rescheduleUrl}}" style="background: #f59e0b; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px;">Reschedule</a>
+              {{/if}}
+              {{#if cancelUrl}}
+              <a href="{{cancelUrl}}" style="background: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; margin: 5px;">Cancel</a>
+              {{/if}}
             </div>
           </div>
-          
-          <div style="background: #d1ecf1; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="color: #0c5460; margin: 0 0 10px 0;">Preparation checklist:</h4>
-            <ul style="color: #0c5460; line-height: 1.6; margin: 0; padding-left: 20px;">
-              <li>Remove all personal items from your vehicle</li>
-              <li>Ensure your vehicle is accessible at the scheduled time</li>
-              <li>Have your keys ready for our team</li>
-            </ul>
-          </div>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            {{#rescheduleUrl}}
-            <a href="{{rescheduleUrl}}" style="background: #ffc107; color: #212529; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">Reschedule</a>
-            {{/rescheduleUrl}}
-            {{#cancelUrl}}
-            <a href="{{cancelUrl}}" style="background: #dc3545; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">Cancel</a>
-            {{/cancelUrl}}
-          </div>
-          
-          <p style="color: #333; margin-top: 25px;">Looking forward to serving you!</p>
-          <p style="color: #333;">- The {{businessName}} Team</p>
         </div>
       </div>
     `,
-    sms: "Reminder: Your {{serviceType}} appointment is tomorrow {{date}} at {{startTime}} with {{businessName}}. Please have {{vehicleInfo}} ready and accessible. Need to reschedule? Reply HELP",
+    smsTemplate:
+      "Reminder: {{serviceType}} appointment tomorrow {{date}} at {{startTime}} with {{businessName}}. Please have your vehicle ready and accessible.",
   },
 
-  appointment_cancelled: {
+  booking_cancelled: {
+    type: "booking_cancelled",
     subject: "Appointment Cancelled - {{businessName}}",
-    html: `
+    emailTemplate: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Appointment Cancelled</h1>
+        <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px;">Appointment Cancelled</h1>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Hi {{customerName}},</p>
-          
-          <p style="color: #666; line-height: 1.6;">Your auto detailing appointment has been cancelled.</p>
-          
-          <div style="background: #f8d7da; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #dc3545;">
-            <h3 style="color: #721c24; margin: 0 0 15px 0; font-size: 20px;">Cancelled Appointment</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <p style="margin: 5px 0;"><strong>Service:</strong> {{serviceType}}</p>
-              <p style="margin: 5px 0;"><strong>Date:</strong> {{date}}</p>
-              <p style="margin: 5px 0;"><strong>Time:</strong> {{startTime}} - {{endTime}}</p>
-              <p style="margin: 5px 0;"><strong>Location:</strong> {{businessName}}</p>
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+          <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <p style="font-size: 16px; color: #333;">Hi {{customerName}},</p>
+            <p style="font-size: 16px; color: #333;">Your appointment has been cancelled:</p>
+            
+            <div style="border-left: 4px solid #dc2626; padding-left: 20px; margin: 20px 0;">
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Service:</strong> {{serviceType}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Original Date:</strong> {{date}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Original Time:</strong> {{startTime}} - {{endTime}}</p>
+              {{#if reason}}<p style="margin: 5px 0; font-size: 16px;"><strong>Reason:</strong> {{reason}}</p>{{/if}}
             </div>
-            {{#reason}}
-            <p style="margin: 15px 0 5px 0;"><strong>Reason:</strong> {{reason}}</p>
-            {{/reason}}
+            
+            <p style="font-size: 16px; color: #333;">We apologize for any inconvenience. If you'd like to book a new appointment, please visit our booking page.</p>
           </div>
-          
-          <p style="color: #666; line-height: 1.6;">We apologize for any inconvenience this may cause. If you'd like to book a new appointment, we'd be happy to help you find a suitable time.</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="{{confirmationUrl}}" style="background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">Book New Appointment</a>
-          </div>
-          
-          <p style="color: #333; margin-top: 25px;">Thank you for your understanding.</p>
-          <p style="color: #333;">- The {{businessName}} Team</p>
         </div>
       </div>
     `,
-    sms: "Your {{serviceType}} appointment on {{date}} at {{startTime}} with {{businessName}} has been cancelled. {{#reason}}Reason: {{reason}}.{{/reason}} Book again anytime!",
+    smsTemplate:
+      "Your {{serviceType}} appointment on {{date}} at {{startTime}} has been cancelled. {{#if reason}}Reason: {{reason}}.{{/if}} Book again anytime!",
   },
 
-  appointment_rescheduled: {
+  booking_rescheduled: {
+    type: "booking_rescheduled",
     subject: "Appointment Rescheduled - {{businessName}}",
-    html: `
+    emailTemplate: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 28px;">Appointment Rescheduled</h1>
+        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px;">Appointment Rescheduled</h1>
         </div>
         
-        <div style="background: white; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <p style="font-size: 18px; color: #333; margin-bottom: 20px;">Hi {{customerName}},</p>
-          
-          <p style="color: #666; line-height: 1.6;">Your auto detailing appointment has been rescheduled to a new date and time.</p>
-          
-          <div style="background: #d1ecf1; padding: 25px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #17a2b8;">
-            <h3 style="color: #0c5460; margin: 0 0 15px 0; font-size: 20px;">{{serviceType}}</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <p style="margin: 5px 0;"><strong>New Date:</strong> {{date}}</p>
-              <p style="margin: 5px 0;"><strong>New Time:</strong> {{startTime}} - {{endTime}}</p>
-              <p style="margin: 5px 0;"><strong>Location:</strong> {{businessName}}</p>
-              <p style="margin: 5px 0;"><strong>Vehicle:</strong> {{vehicleInfo}}</p>
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+          <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <p style="font-size: 16px; color: #333;">Hi {{customerName}},</p>
+            <p style="font-size: 16px; color: #333;">Your appointment has been rescheduled:</p>
+            
+            <div style="border-left: 4px solid #0ea5e9; padding-left: 20px; margin: 20px 0;">
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Service:</strong> {{serviceType}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>New Date:</strong> {{newDate}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>New Time:</strong> {{newStartTime}} - {{newEndTime}}</p>
+              <p style="margin: 5px 0; font-size: 16px;"><strong>Location:</strong> {{businessName}}</p>
+              {{#if reason}}<p style="margin: 5px 0; font-size: 16px;"><strong>Reason:</strong> {{reason}}</p>{{/if}}
             </div>
-            {{#reason}}
-            <p style="margin: 15px 0 5px 0;"><strong>Reason:</strong> {{reason}}</p>
-            {{/reason}}
+            
+            <p style="font-size: 16px; color: #333;">We'll send you a reminder 24 hours before your new appointment time.</p>
           </div>
-          
-          <p style="color: #666; line-height: 1.6;">We'll send you a reminder 24 hours before your new appointment time. Thank you for your flexibility!</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            {{#confirmationUrl}}
-            <a href="{{confirmationUrl}}" style="background: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">Manage Booking</a>
-            {{/confirmationUrl}}
-          </div>
-          
-          <p style="color: #333; margin-top: 25px;">Looking forward to serving you at the new time!</p>
-          <p style="color: #333;">- The {{businessName}} Team</p>
         </div>
       </div>
     `,
-    sms: "Your {{serviceType}} appointment has been rescheduled to {{date}} at {{startTime}} with {{businessName}}. {{#reason}}Reason: {{reason}}.{{/reason}} We'll send a reminder 24hrs before.",
+    smsTemplate:
+      "Your {{serviceType}} appointment has been rescheduled to {{newDate}} at {{newStartTime}} with {{businessName}}. {{#if reason}}Reason: {{reason}}.{{/if}}",
   },
+}
+
+export const renderTemplate = (template: string, data: NotificationData): string => {
+  let rendered = template
+
+  // Simple template rendering (replace with a proper template engine in production)
+  Object.entries(data).forEach(([key, value]) => {
+    const regex = new RegExp(`{{${key}}}`, "g")
+    rendered = rendered.replace(regex, String(value || ""))
+  })
+
+  // Handle conditional blocks (simplified)
+  rendered = rendered.replace(/{{#if\s+(\w+)}}(.*?){{\/if}}/gs, (match, condition, content) => {
+    return data[condition as keyof NotificationData] ? content : ""
+  })
+
+  return rendered
 }

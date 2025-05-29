@@ -3,51 +3,58 @@
 import { useState } from "react"
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
-import { useUser } from "@clerk/nextjs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { LoadingSpinner } from "@/components/loading-spinner"
+import { Mail, MessageSquare, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
-export function NotificationDashboard() {
-  const { user } = useUser()
+interface NotificationDashboardProps {
+  userId?: string
+  businessId?: string
+}
+
+export function NotificationDashboard({ userId, businessId }: NotificationDashboardProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [methodFilter, setMethodFilter] = useState<string>("all")
 
-  const notifications = useQuery(
-    api.notifications.getUserNotifications,
-    user?.id
-      ? {
-          userId: user.id,
-          limit: 50,
-          status: statusFilter,
-        }
-      : "skip",
-  )
+  const notificationLogs = useQuery(api.notifications.getNotificationLogs, {
+    userId,
+    businessId,
+    status: statusFilter === "all" ? undefined : statusFilter,
+    method: methodFilter === "all" ? undefined : (methodFilter as "email" | "sms"),
+    limit: 100,
+  })
 
-  if (!user) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center p-6">
-          <p>Please sign in to view notifications.</p>
-        </CardContent>
-      </Card>
-    )
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "sent":
+      case "delivered":
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case "failed":
+        return <XCircle className="h-4 w-4 text-red-500" />
+      case "queued":
+        return <Clock className="h-4 w-4 text-yellow-500" />
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />
+    }
   }
 
-  if (notifications === undefined) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center p-6">
-          <LoadingSpinner size="lg" />
-        </CardContent>
-      </Card>
-    )
+  const getMethodIcon = (method: string) => {
+    switch (method) {
+      case "email":
+        return <Mail className="h-4 w-4" />
+      case "sms":
+        return <MessageSquare className="h-4 w-4" />
+      default:
+        return null
+    }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "sent":
+      case "delivered":
         return "bg-green-100 text-green-800"
       case "failed":
         return "bg-red-100 text-red-800"
@@ -58,64 +65,140 @@ export function NotificationDashboard() {
     }
   }
 
-  const getTypeLabel = (type: string) => {
-    return type
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
+  const stats = notificationLogs?.reduce(
+    (acc, log) => {
+      acc.total++
+      acc[log.status as keyof typeof acc]++
+      if (log.method === "email") acc.email++
+      if (log.method === "sms") acc.sms++
+      return acc
+    },
+    { total: 0, sent: 0, failed: 0, queued: 0, delivered: 0, email: 0, sms: 0 },
+  ) || { total: 0, sent: 0, failed: 0, queued: 0, delivered: 0, email: 0, sms: 0 }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Notification History</CardTitle>
-            <CardDescription>View all notifications sent to you</CardDescription>
-          </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="sent">Sent</SelectItem>
-              <SelectItem value="failed">Failed</SelectItem>
-              <SelectItem value="queued">Queued</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {notifications.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No notifications found.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div key={notification._id} className="flex items-start justify-between p-4 border rounded-lg">
-                <div className="space-y-1 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{notification.subject}</h4>
-                    <Badge className={getStatusColor(notification.status)}>{notification.status}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{getTypeLabel(notification.type)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium">{notification.recipient}</p>
-                  {notification.metadata?.error && (
-                    <p className="text-xs text-red-600 mt-1">{notification.metadata.error}</p>
-                  )}
-                </div>
+    <div className="space-y-6">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
               </div>
-            ))}
+              <RefreshCw className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Sent</p>
+                <p className="text-2xl font-bold text-green-600">{stats.sent + stats.delivered}</p>
+              </div>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold text-red-600">{stats.failed}</p>
+              </div>
+              <XCircle className="h-4 w-4 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Queued</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.queued}</p>
+              </div>
+              <Clock className="h-4 w-4 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Logs */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Notification Logs</CardTitle>
+          <CardDescription>Track all notification attempts and their delivery status</CardDescription>
+
+          <div className="flex gap-4">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="queued">Queued</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={methodFilter} onValueChange={setMethodFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Filter by method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Methods</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="sms">SMS</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent>
+          <div className="space-y-4">
+            {notificationLogs?.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No notifications found</div>
+            ) : (
+              notificationLogs?.map((log) => (
+                <div
+                  key={log._id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      {getMethodIcon(log.method)}
+                      {getStatusIcon(log.status)}
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{log.type.replace(/_/g, " ")}</span>
+                        <Badge className={getStatusColor(log.status)}>{log.status}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">To: {log.recipient}</p>
+                      {log.errorMessage && <p className="text-sm text-red-600">Error: {log.errorMessage}</p>}
+                    </div>
+                  </div>
+
+                  <div className="text-right text-sm text-muted-foreground">
+                    <p>{formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}</p>
+                    {log.sentAt && <p>Sent: {formatDistanceToNow(new Date(log.sentAt), { addSuffix: true })}</p>}
+                    {log.retryCount > 0 && <p className="text-yellow-600">Retries: {log.retryCount}</p>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
