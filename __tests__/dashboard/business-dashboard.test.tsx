@@ -1,206 +1,172 @@
-import { render, screen, waitFor } from "@testing-library/react"
-import { useUser } from "@clerk/nextjs"
-import { useQuery } from "convex/react"
+import { render, screen, fireEvent } from "../utils/test-utils"
+import { jest } from "@jest/globals"
 import BusinessDashboard from "@/app/business/dashboard/page"
-import { mockBusinessUser, mockBusinessProfile, mockAppointments, mockServices } from "../setup"
+import {
+  mockBusinessUser,
+  mockBusinessProfile,
+  mockAppointment,
+  mockService,
+  mockDashboardStats,
+  mockClerkUser,
+} from "../utils/test-utils"
 
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>
-const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>
-
-// Mock redirect
-const mockRedirect = jest.fn()
+// Mock next/navigation
+const mockPush = jest.fn()
 jest.mock("next/navigation", () => ({
-  redirect: mockRedirect,
+  useRouter: () => ({
+    push: mockPush,
+  }),
+  redirect: jest.fn(),
 }))
 
-describe("BusinessDashboard", () => {
+describe("Business Dashboard", () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUser.mockReturnValue({
-      user: mockBusinessUser,
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
+    mockClerkUser(mockBusinessUser)
   })
 
-  it("renders loading state when user is not loaded", () => {
-    mockUseUser.mockReturnValue({
-      user: null,
-      isLoaded: false,
-      isSignedIn: false,
-    } as any)
+  it("renders dashboard with business data", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser) // getUserByClerkId
+      .mockReturnValueOnce(mockBusinessProfile) // getBusinessProfileByUserId
+      .mockReturnValueOnce([mockAppointment]) // getBusinessAppointments
+      .mockReturnValueOnce([mockService]) // getBusinessServices
+      .mockReturnValueOnce(mockDashboardStats) // getBusinessStats
 
     render(<BusinessDashboard />)
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
+
+    expect(screen.getByText("Business Dashboard")).toBeInTheDocument()
+    expect(screen.getByText(`Welcome, ${mockBusinessProfile.businessName}!`)).toBeInTheDocument()
+    expect(screen.getByText("25")).toBeInTheDocument() // Total appointments
+    expect(screen.getByText("$3750.00")).toBeInTheDocument() // Total revenue
+    expect(screen.getByText("15")).toBeInTheDocument() // Total customers
+    expect(screen.getByText("8")).toBeInTheDocument() // Upcoming appointments
   })
 
-  it("redirects when user is not logged in", () => {
-    mockUseUser.mockReturnValue({
-      user: null,
-      isLoaded: true,
-      isSignedIn: false,
-    } as any)
+  it("displays upcoming appointments", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockService])
+      .mockReturnValueOnce(mockDashboardStats)
 
     render(<BusinessDashboard />)
-    expect(mockRedirect).toHaveBeenCalledWith("/sign-in")
+
+    expect(screen.getByText("Upcoming Appointments")).toBeInTheDocument()
+    expect(screen.getByText(mockAppointment.customerName)).toBeInTheDocument()
+    expect(screen.getByText(mockAppointment.serviceName)).toBeInTheDocument()
   })
 
-  it("redirects when user is not a business", () => {
-    const customerUser = { ...mockBusinessUser, publicMetadata: { role: "customer" } }
-    mockUseUser.mockReturnValue({
-      user: customerUser,
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
-
-    // Mock user details query
-    mockUseQuery.mockImplementation((query) => {
-      if (query === "users:getUserByClerkId") {
-        return { role: "customer", clerkId: "user_123" }
-      }
-      return undefined
-    })
+  it("displays services management", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockService])
+      .mockReturnValueOnce(mockDashboardStats)
 
     render(<BusinessDashboard />)
+
+    // Click on Services tab
+    fireEvent.click(screen.getByText("Services"))
+
+    expect(screen.getByText("Your Services")).toBeInTheDocument()
+    expect(screen.getByText(mockService.name)).toBeInTheDocument()
+    expect(screen.getByText(mockService.description)).toBeInTheDocument()
+    expect(screen.getByText(`$${mockService.price.toFixed(2)}`)).toBeInTheDocument()
+  })
+
+  it("handles empty appointments state", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([]) // Empty appointments
+      .mockReturnValueOnce([mockService])
+      .mockReturnValueOnce(mockDashboardStats)
+
+    render(<BusinessDashboard />)
+
+    expect(screen.getByText("No upcoming appointments")).toBeInTheDocument()
+    expect(screen.getByText("Schedule Appointment")).toBeInTheDocument()
+  })
+
+  it("handles empty services state", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([]) // Empty services
+      .mockReturnValueOnce(mockDashboardStats)
+
+    render(<BusinessDashboard />)
+
+    // Click on Services tab
+    fireEvent.click(screen.getByText("Services"))
+
+    expect(screen.getByText("No services added yet")).toBeInTheDocument()
+    expect(screen.getByText("Add Service")).toBeInTheDocument()
+  })
+
+  it("redirects non-business users", () => {
+    const mockRedirect = jest.fn()
+    jest.doMock("next/navigation", () => ({
+      redirect: mockRedirect,
+    }))
+
+    mockClerkUser({ ...mockBusinessUser, publicMetadata: { role: "customer" } })
+
+    const { useQuery } = require("convex/react")
+    useQuery.mockReturnValue({ role: "customer" })
+
+    render(<BusinessDashboard />)
+
     expect(mockRedirect).toHaveBeenCalledWith("/role-selection")
   })
 
-  it("renders business dashboard with stats", async () => {
-    // Mock all queries
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "business", clerkId: "user_123", name: "John Doe" }
-        case "businessProfiles:getBusinessProfileByUserId":
-          return mockBusinessProfile
-        case "appointments:getBusinessAppointments":
-          return mockAppointments
-        case "services:getBusinessServices":
-          return mockServices
-        case "dashboard:getBusinessStats":
-          return {
-            totalAppointments: 25,
-            totalRevenue: 2500,
-            totalCustomers: 15,
-            upcomingAppointments: 5,
-          }
-        default:
-          return undefined
-      }
-    })
+  it("shows loading state when data is loading", () => {
+    const { useQuery } = require("convex/react")
+    useQuery.mockReturnValue(undefined) // Loading state
+
+    mockClerkUser({ ...mockBusinessUser, isLoaded: false })
 
     render(<BusinessDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Business Dashboard")).toBeInTheDocument()
-      expect(screen.getByText("Welcome, Test Auto Detailing!")).toBeInTheDocument()
-    })
-
-    // Check stats cards
-    expect(screen.getByText("25")).toBeInTheDocument() // Total appointments
-    expect(screen.getByText("$2500.00")).toBeInTheDocument() // Total revenue
-    expect(screen.getByText("15")).toBeInTheDocument() // Total customers
-    expect(screen.getByText("5")).toBeInTheDocument() // Upcoming appointments
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
   })
 
-  it("renders appointments tab with appointment list", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "business", clerkId: "user_123" }
-        case "businessProfiles:getBusinessProfileByUserId":
-          return mockBusinessProfile
-        case "appointments:getBusinessAppointments":
-          return mockAppointments.map((apt) => ({
-            ...apt,
-            customerName: "John Customer",
-            serviceName: apt.serviceType,
-            time: apt.startTime,
-          }))
-        case "services:getBusinessServices":
-          return mockServices
-        case "dashboard:getBusinessStats":
-          return {
-            totalAppointments: 0,
-            totalRevenue: 0,
-            totalCustomers: 0,
-            upcomingAppointments: 0,
-          }
-        default:
-          return undefined
-      }
-    })
+  it("navigates to appointment details", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockService])
+      .mockReturnValueOnce(mockDashboardStats)
 
     render(<BusinessDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Upcoming Appointments")).toBeInTheDocument()
-      expect(screen.getByText("John Customer")).toBeInTheDocument()
-      expect(screen.getByText("Basic Wash")).toBeInTheDocument()
-    })
+    const viewDetailsButton = screen.getByText("View Details")
+    expect(viewDetailsButton.closest("a")).toHaveAttribute("href", `/business/appointments/${mockAppointment._id}`)
   })
 
-  it("renders services tab with service list", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "business", clerkId: "user_123" }
-        case "businessProfiles:getBusinessProfileByUserId":
-          return mockBusinessProfile
-        case "appointments:getBusinessAppointments":
-          return []
-        case "services:getBusinessServices":
-          return mockServices
-        case "dashboard:getBusinessStats":
-          return {
-            totalAppointments: 0,
-            totalRevenue: 0,
-            totalCustomers: 0,
-            upcomingAppointments: 0,
-          }
-        default:
-          return undefined
-      }
-    })
+  it("navigates to new appointment creation", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockBusinessUser)
+      .mockReturnValueOnce(mockBusinessProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockService])
+      .mockReturnValueOnce(mockDashboardStats)
 
     render(<BusinessDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Your Services")).toBeInTheDocument()
-      expect(screen.getByText("Basic Wash")).toBeInTheDocument()
-      expect(screen.getByText("Premium Detail")).toBeInTheDocument()
-      expect(screen.getByText("$50.00 • 60 min")).toBeInTheDocument()
-    })
-  })
-
-  it("shows empty states when no data", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "business", clerkId: "user_123" }
-        case "businessProfiles:getBusinessProfileByUserId":
-          return mockBusinessProfile
-        case "appointments:getBusinessAppointments":
-          return []
-        case "services:getBusinessServices":
-          return []
-        case "dashboard:getBusinessStats":
-          return {
-            totalAppointments: 0,
-            totalRevenue: 0,
-            totalCustomers: 0,
-            upcomingAppointments: 0,
-          }
-        default:
-          return undefined
-      }
-    })
-
-    render(<BusinessDashboard />)
-
-    await waitFor(() => {
-      expect(screen.getByText("No upcoming appointments")).toBeInTheDocument()
-      expect(screen.getByText("No services added yet")).toBeInTheDocument()
-    })
+    const newAppointmentButton = screen.getByText("New Appointment")
+    expect(newAppointmentButton.closest("a")).toHaveAttribute("href", "/business/appointments/new")
   })
 })

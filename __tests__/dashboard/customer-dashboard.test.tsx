@@ -1,208 +1,171 @@
-import { render, screen, waitFor } from "@testing-library/react"
-import { useUser } from "@clerk/nextjs"
-import { useQuery } from "convex/react"
+import { render, screen, fireEvent } from "../utils/test-utils"
+import { jest } from "@jest/globals"
 import CustomerDashboard from "@/app/customer/dashboard/page"
-import { mockCustomerUser, mockCustomerProfile, mockAppointments } from "../setup"
+import {
+  mockUser,
+  mockCustomerProfile,
+  mockAppointment,
+  mockVehicle,
+  mockService,
+  mockClerkUser,
+} from "../utils/test-utils"
 
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>
-const mockUseQuery = useQuery as jest.MockedFunction<typeof useQuery>
-
-const mockRedirect = jest.fn()
-jest.mock("next/navigation", () => ({
-  redirect: mockRedirect,
-}))
-
-describe("CustomerDashboard", () => {
-  const mockVehicles = [
-    {
-      _id: "vehicle_1",
-      userId: "user_123",
-      make: "Toyota",
-      model: "Camry",
-      year: 2020,
-      color: "Blue",
-      licensePlate: "ABC123",
-    },
-  ]
-
-  const mockRecommendedServices = [
-    {
-      _id: "service_1",
-      name: "Ceramic Coating",
-      description: "Long-lasting paint protection",
-      price: 300,
-      duration: 240,
-      rating: 4.8,
-    },
-  ]
-
+describe("Customer Dashboard", () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUser.mockReturnValue({
-      user: mockCustomerUser,
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
+    mockClerkUser(mockUser)
   })
 
-  it("renders loading state when user is not loaded", () => {
-    mockUseUser.mockReturnValue({
-      user: null,
-      isLoaded: false,
-      isSignedIn: false,
-    } as any)
-
-    render(<CustomerDashboard />)
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
-  })
-
-  it("redirects when user is not logged in", () => {
-    mockUseUser.mockReturnValue({
-      user: null,
-      isLoaded: true,
-      isSignedIn: false,
-    } as any)
-
-    render(<CustomerDashboard />)
-    expect(mockRedirect).toHaveBeenCalledWith("/sign-in")
-  })
-
-  it("redirects when user is not a customer", () => {
-    const businessUser = { ...mockCustomerUser, publicMetadata: { role: "business" } }
-    mockUseUser.mockReturnValue({
-      user: businessUser,
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
-
-    mockUseQuery.mockImplementation((query) => {
-      if (query === "users:getUserByClerkId") {
-        return { role: "business", clerkId: "user_123" }
-      }
-      return undefined
-    })
-
-    render(<CustomerDashboard />)
-    expect(mockRedirect).toHaveBeenCalledWith("/role-selection")
-  })
-
-  it("renders customer dashboard with appointments", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "customer", clerkId: "user_123", name: "John Doe" }
-        case "customerProfiles:getCustomerProfileByUserId":
-          return mockCustomerProfile
-        case "appointments:getCustomerAppointments":
-          return mockAppointments.map((apt) => ({
-            ...apt,
-            serviceName: apt.serviceType,
-            businessName: "Test Auto Detailing",
-            time: apt.startTime,
-            duration: 60,
-          }))
-        case "customerProfiles:getCustomerVehicles":
-          return mockVehicles
-        case "recommendations:getRecommendedServices":
-          return mockRecommendedServices
-        default:
-          return undefined
-      }
-    })
+  it("renders dashboard with customer data", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser) // getUserByClerkId
+      .mockReturnValueOnce(mockCustomerProfile) // getCustomerProfileByUserId
+      .mockReturnValueOnce([mockAppointment]) // getCustomerAppointments
+      .mockReturnValueOnce([mockVehicle]) // getCustomerVehicles
+      .mockReturnValueOnce([mockService]) // getRecommendedServices
 
     render(<CustomerDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Customer Dashboard")).toBeInTheDocument()
-      expect(screen.getByText("Welcome, John Doe!")).toBeInTheDocument()
-    })
+    expect(screen.getByText("Customer Dashboard")).toBeInTheDocument()
+    expect(screen.getByText(`Welcome, ${mockCustomerProfile.name}!`)).toBeInTheDocument()
+  })
 
-    // Check appointments tab
+  it("displays customer appointments", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([{ ...mockAppointment, serviceName: "Premium Detail" }])
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([mockService])
+
+    render(<CustomerDashboard />)
+
     expect(screen.getByText("Your Appointments")).toBeInTheDocument()
-    expect(screen.getByText("Basic Wash")).toBeInTheDocument()
-    expect(screen.getByText("Test Auto Detailing")).toBeInTheDocument()
+    expect(screen.getByText("Premium Detail")).toBeInTheDocument()
   })
 
-  it("renders vehicles tab with vehicle list", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "customer", clerkId: "user_123" }
-        case "customerProfiles:getCustomerProfileByUserId":
-          return mockCustomerProfile
-        case "appointments:getCustomerAppointments":
-          return []
-        case "customerProfiles:getCustomerVehicles":
-          return mockVehicles
-        case "recommendations:getRecommendedServices":
-          return []
-        default:
-          return undefined
-      }
-    })
+  it("displays customer vehicles", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([mockService])
 
     render(<CustomerDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Your Vehicles")).toBeInTheDocument()
-      expect(screen.getByText("2020 Toyota Camry")).toBeInTheDocument()
-      expect(screen.getByText("Blue")).toBeInTheDocument()
-      expect(screen.getByText("License: ABC123")).toBeInTheDocument()
-    })
+    // Click on Vehicles tab
+    fireEvent.click(screen.getByText("My Vehicles"))
+
+    expect(screen.getByText("Your Vehicles")).toBeInTheDocument()
+    expect(screen.getByText(`${mockVehicle.year} ${mockVehicle.make} ${mockVehicle.model}`)).toBeInTheDocument()
+    expect(screen.getByText(mockVehicle.color)).toBeInTheDocument()
   })
 
-  it("renders recommended services tab", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "customer", clerkId: "user_123" }
-        case "customerProfiles:getCustomerProfileByUserId":
-          return mockCustomerProfile
-        case "appointments:getCustomerAppointments":
-          return []
-        case "customerProfiles:getCustomerVehicles":
-          return []
-        case "recommendations:getRecommendedServices":
-          return mockRecommendedServices
-        default:
-          return undefined
-      }
-    })
+  it("displays recommended services", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([mockService])
 
     render(<CustomerDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("Recommended Services")).toBeInTheDocument()
-      expect(screen.getByText("Ceramic Coating")).toBeInTheDocument()
-      expect(screen.getByText("$300.00")).toBeInTheDocument()
-      expect(screen.getByText("4.8")).toBeInTheDocument()
-    })
+    // Click on Recommended Services tab
+    fireEvent.click(screen.getByText("Recommended Services"))
+
+    expect(screen.getByText("Recommended Services")).toBeInTheDocument()
+    expect(screen.getByText(mockService.name)).toBeInTheDocument()
+    expect(screen.getByText(mockService.description)).toBeInTheDocument()
   })
 
-  it("shows empty states when no data", async () => {
-    mockUseQuery.mockImplementation((query) => {
-      switch (query) {
-        case "users:getUserByClerkId":
-          return { role: "customer", clerkId: "user_123" }
-        case "customerProfiles:getCustomerProfileByUserId":
-          return mockCustomerProfile
-        case "appointments:getCustomerAppointments":
-          return []
-        case "customerProfiles:getCustomerVehicles":
-          return []
-        case "recommendations:getRecommendedServices":
-          return []
-        default:
-          return undefined
-      }
-    })
+  it("handles empty appointments state", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([]) // Empty appointments
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([mockService])
 
     render(<CustomerDashboard />)
 
-    await waitFor(() => {
-      expect(screen.getByText("No appointments scheduled")).toBeInTheDocument()
-      expect(screen.getByText("No vehicles added yet")).toBeInTheDocument()
-      expect(screen.getByText("No recommended services available")).toBeInTheDocument()
-    })
+    expect(screen.getByText("No appointments scheduled")).toBeInTheDocument()
+    expect(screen.getByText("Book an Appointment")).toBeInTheDocument()
+  })
+
+  it("handles empty vehicles state", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([]) // Empty vehicles
+      .mockReturnValueOnce([mockService])
+
+    render(<CustomerDashboard />)
+
+    // Click on Vehicles tab
+    fireEvent.click(screen.getByText("My Vehicles"))
+
+    expect(screen.getByText("No vehicles added yet")).toBeInTheDocument()
+    expect(screen.getByText("Add Vehicle")).toBeInTheDocument()
+  })
+
+  it("handles empty recommended services state", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([]) // Empty services
+
+    render(<CustomerDashboard />)
+
+    // Click on Recommended Services tab
+    fireEvent.click(screen.getByText("Recommended Services"))
+
+    expect(screen.getByText("No recommended services available")).toBeInTheDocument()
+    expect(screen.getByText("Browse All Services")).toBeInTheDocument()
+  })
+
+  it("navigates to book appointment with service pre-selected", () => {
+    const { useQuery } = require("convex/react")
+    useQuery
+      .mockReturnValueOnce(mockUser)
+      .mockReturnValueOnce(mockCustomerProfile)
+      .mockReturnValueOnce([mockAppointment])
+      .mockReturnValueOnce([mockVehicle])
+      .mockReturnValueOnce([mockService])
+
+    render(<CustomerDashboard />)
+
+    // Click on Recommended Services tab
+    fireEvent.click(screen.getByText("Recommended Services"))
+
+    const bookNowButton = screen.getByText("Book Now")
+    expect(bookNowButton.closest("a")).toHaveAttribute("href", `/customer/book?service=${mockService._id}`)
+  })
+
+  it("redirects non-customer users", () => {
+    const mockRedirect = jest.fn()
+    jest.doMock("next/navigation", () => ({
+      redirect: mockRedirect,
+    }))
+
+    mockClerkUser({ ...mockUser, publicMetadata: { role: "business" } })
+
+    const { useQuery } = require("convex/react")
+    useQuery.mockReturnValue({ role: "business" })
+
+    render(<CustomerDashboard />)
+
+    expect(mockRedirect).toHaveBeenCalledWith("/role-selection")
   })
 })

@@ -2,178 +2,206 @@ import { ConvexTestingHelper } from "convex/testing"
 import { api } from "@/convex/_generated/api"
 import schema from "@/convex/schema"
 
+const t = new ConvexTestingHelper(schema)
+
 describe("Appointments Convex Functions", () => {
-  let t: ConvexTestingHelper<typeof schema>
-
   beforeEach(async () => {
-    t = new ConvexTestingHelper(schema)
-    await t.run(async (ctx) => {
-      // Seed test data
-      await ctx.db.insert("users", {
-        clerkId: "user_123",
-        name: "John Doe",
-        email: "john@example.com",
-        role: "customer",
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      })
-
-      await ctx.db.insert("businessProfiles", {
-        userId: "business_123",
-        businessName: "Test Auto Detailing",
-        businessType: "mobile",
-        city: "Test City",
-        state: "TS",
-        zipCode: "12345",
-        phone: "555-0123",
-        email: "business@test.com",
-        onboardingCompleted: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-    })
+    await t.clearAll()
   })
 
-  it("creates an appointment successfully", async () => {
-    const appointmentId = await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-      price: 50,
+  describe("createAppointment", () => {
+    it("creates a new appointment successfully", async () => {
+      const appointmentId = await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+        price: 150,
+        notes: "Test appointment",
+      })
+
+      expect(appointmentId).toBeDefined()
+
+      const appointment = await t.query(api.appointments.getAppointmentsByDate, {
+        date: "2024-02-15",
+      })
+
+      expect(appointment).toHaveLength(1)
+      expect(appointment[0].customerId).toBe("user_123")
+      expect(appointment[0].serviceType).toBe("Premium Detail")
+      expect(appointment[0].status).toBe("scheduled")
     })
 
-    expect(appointmentId).toBeDefined()
+    it("prevents double booking with time conflicts", async () => {
+      // Create first appointment
+      await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        staffId: "staff_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+      })
 
-    const appointment = await t.run(async (ctx) => {
-      return await ctx.db.get(appointmentId)
+      // Try to create conflicting appointment
+      await expect(
+        t.mutation(api.appointments.createAppointment, {
+          customerId: "user_456",
+          staffId: "staff_123",
+          date: "2024-02-15",
+          startTime: "11:00",
+          endTime: "13:00",
+          serviceType: "Basic Wash",
+        }),
+      ).rejects.toThrow("The selected staff member is not available at this time")
     })
 
-    expect(appointment).toMatchObject({
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-      status: "scheduled",
-      price: 50,
-    })
-  })
+    it("allows non-conflicting appointments", async () => {
+      // Create first appointment
+      await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        staffId: "staff_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+      })
 
-  it("prevents double booking", async () => {
-    // Create first appointment
-    await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      staffId: "staff_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-    })
-
-    // Try to create conflicting appointment
-    await expect(
-      t.mutation(api.appointments.createAppointment, {
+      // Create non-conflicting appointment
+      const secondAppointment = await t.mutation(api.appointments.createAppointment, {
         customerId: "user_456",
         staffId: "staff_123",
-        date: "2024-01-15",
-        startTime: "10:30",
-        endTime: "11:30",
+        date: "2024-02-15",
+        startTime: "13:00",
+        endTime: "15:00",
+        serviceType: "Basic Wash",
+      })
+
+      expect(secondAppointment).toBeDefined()
+
+      const appointments = await t.query(api.appointments.getAppointmentsByDate, {
+        date: "2024-02-15",
+      })
+
+      expect(appointments).toHaveLength(2)
+    })
+  })
+
+  describe("updateAppointment", () => {
+    it("updates appointment successfully", async () => {
+      const appointmentId = await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
         serviceType: "Premium Detail",
-      }),
-    ).rejects.toThrow("The selected staff member is not available at this time")
+      })
+
+      await t.mutation(api.appointments.updateAppointment, {
+        appointmentId,
+        status: "confirmed",
+        notes: "Updated notes",
+      })
+
+      const appointments = await t.query(api.appointments.getAppointmentsByDate, {
+        date: "2024-02-15",
+      })
+
+      expect(appointments[0].status).toBe("confirmed")
+      expect(appointments[0].notes).toBe("Updated notes")
+    })
+
+    it("throws error for non-existent appointment", async () => {
+      await expect(
+        t.mutation(api.appointments.updateAppointment, {
+          appointmentId: "non_existent_id" as any,
+          status: "confirmed",
+        }),
+      ).rejects.toThrow("Appointment not found")
+    })
   })
 
-  it("updates an appointment", async () => {
-    const appointmentId = await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-    })
+  describe("cancelAppointment", () => {
+    it("cancels appointment successfully", async () => {
+      const appointmentId = await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+      })
 
-    await t.mutation(api.appointments.updateAppointment, {
-      appointmentId,
-      price: 75,
-      notes: "Updated price",
-    })
+      const result = await t.mutation(api.appointments.cancelAppointment, {
+        appointmentId,
+        reason: "Customer requested cancellation",
+      })
 
-    const updatedAppointment = await t.run(async (ctx) => {
-      return await ctx.db.get(appointmentId)
-    })
+      expect(result.success).toBe(true)
 
-    expect(updatedAppointment?.price).toBe(75)
-    expect(updatedAppointment?.notes).toBe("Updated price")
-    expect(updatedAppointment?.updatedAt).toBeDefined()
+      const appointments = await t.query(api.appointments.getAppointmentsByDate, {
+        date: "2024-02-15",
+      })
+
+      expect(appointments[0].status).toBe("cancelled")
+      expect(appointments[0].notes).toContain("Customer requested cancellation")
+    })
   })
 
-  it("cancels an appointment", async () => {
-    const appointmentId = await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
+  describe("getCustomerAppointments", () => {
+    it("returns customer appointments", async () => {
+      await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+      })
+
+      await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_456",
+        date: "2024-02-15",
+        startTime: "13:00",
+        endTime: "15:00",
+        serviceType: "Basic Wash",
+      })
+
+      const appointments = await t.query(api.appointments.getCustomerAppointments, {
+        customerId: "user_123",
+      })
+
+      expect(appointments).toHaveLength(1)
+      expect(appointments[0].customerId).toBe("user_123")
     })
 
-    const result = await t.mutation(api.appointments.cancelAppointment, {
-      appointmentId,
-      reason: "Customer request",
+    it("filters appointments by status", async () => {
+      const appointmentId = await t.mutation(api.appointments.createAppointment, {
+        customerId: "user_123",
+        date: "2024-02-15",
+        startTime: "10:00",
+        endTime: "12:00",
+        serviceType: "Premium Detail",
+      })
+
+      await t.mutation(api.appointments.updateAppointment, {
+        appointmentId,
+        status: "completed",
+      })
+
+      const completedAppointments = await t.query(api.appointments.getCustomerAppointments, {
+        customerId: "user_123",
+        status: "completed",
+      })
+
+      expect(completedAppointments).toHaveLength(1)
+      expect(completedAppointments[0].status).toBe("completed")
+
+      const scheduledAppointments = await t.query(api.appointments.getCustomerAppointments, {
+        customerId: "user_123",
+        status: "scheduled",
+      })
+
+      expect(scheduledAppointments).toHaveLength(0)
     })
-
-    expect(result.success).toBe(true)
-
-    const cancelledAppointment = await t.run(async (ctx) => {
-      return await ctx.db.get(appointmentId)
-    })
-
-    expect(cancelledAppointment?.status).toBe("cancelled")
-    expect(cancelledAppointment?.notes).toContain("Cancellation reason: Customer request")
-  })
-
-  it("gets appointments by date", async () => {
-    await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-    })
-
-    await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_456",
-      date: "2024-01-15",
-      startTime: "14:00",
-      endTime: "15:00",
-      serviceType: "Premium Detail",
-    })
-
-    const appointments = await t.query(api.appointments.getAppointmentsByDate, {
-      date: "2024-01-15",
-    })
-
-    expect(appointments).toHaveLength(2)
-    expect(appointments[0].date).toBe("2024-01-15")
-    expect(appointments[1].date).toBe("2024-01-15")
-  })
-
-  it("gets customer appointments", async () => {
-    await t.mutation(api.appointments.createAppointment, {
-      customerId: "user_123",
-      date: "2024-01-15",
-      startTime: "10:00",
-      endTime: "11:00",
-      serviceType: "Basic Wash",
-    })
-
-    const appointments = await t.query(api.appointments.getCustomerAppointments, {
-      customerId: "user_123",
-      limit: 10,
-    })
-
-    expect(appointments).toHaveLength(1)
-    expect(appointments[0].customerId).toBe("user_123")
   })
 })

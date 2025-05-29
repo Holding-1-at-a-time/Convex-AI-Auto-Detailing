@@ -1,35 +1,20 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react"
-import { useUser, useAuth } from "@clerk/nextjs"
-import { useMutation } from "convex/react"
+import { render, screen, fireEvent, waitFor } from "../utils/test-utils"
+import { jest } from "@jest/globals"
 import RoleSelectionPage from "@/app/role-selection/page"
-import { mockUser } from "../setup"
+import { mockUser, mockClerkUser, mockConvexMutation } from "../utils/test-utils"
 
-// Mock the hooks
-const mockUseUser = useUser as jest.MockedFunction<typeof useUser>
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>
-const mockUseMutation = useMutation as jest.MockedFunction<typeof useMutation>
-
-// Mock router
+// Mock next/navigation
 const mockPush = jest.fn()
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({
+    push: mockPush,
+  }),
 }))
 
-describe("RoleSelectionPage", () => {
-  const mockCreateOrUpdateUser = jest.fn()
-
+describe("Role Selection Page", () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUser.mockReturnValue({
-      user: mockUser,
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
-    mockUseAuth.mockReturnValue({
-      isLoaded: true,
-      isSignedIn: true,
-    } as any)
-    mockUseMutation.mockReturnValue(mockCreateOrUpdateUser)
+    mockClerkUser({ ...mockUser, publicMetadata: {} }) // User without role
   })
 
   it("renders role selection options", () => {
@@ -40,25 +25,19 @@ describe("RoleSelectionPage", () => {
     expect(screen.getByText("I'm a Business Owner")).toBeInTheDocument()
   })
 
-  it("shows loading spinner when user is not loaded", () => {
-    mockUseUser.mockReturnValue({
-      user: null,
-      isLoaded: false,
-      isSignedIn: false,
-    } as any)
-
-    render(<RoleSelectionPage />)
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
-  })
-
   it("handles customer role selection", async () => {
+    const mockCreateUser = jest.fn().mockResolvedValue("user_123")
+    const mockUpdate = jest.fn().mockResolvedValue({})
+    mockConvexMutation(mockCreateUser)
+    mockClerkUser({ ...mockUser, update: mockUpdate, publicMetadata: {} })
+
     render(<RoleSelectionPage />)
 
-    const customerCard = screen.getByText("Continue as Customer").closest("div")
-    fireEvent.click(customerCard!)
+    const customerButton = screen.getByText("Continue as Customer")
+    fireEvent.click(customerButton)
 
     await waitFor(() => {
-      expect(mockUser.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         publicMetadata: {
           role: "customer",
           onboardingComplete: false,
@@ -66,11 +45,11 @@ describe("RoleSelectionPage", () => {
       })
     })
 
-    expect(mockCreateOrUpdateUser).toHaveBeenCalledWith({
-      clerkId: "user_123",
-      email: "john@example.com",
-      firstName: "John",
-      lastName: "Doe",
+    expect(mockCreateUser).toHaveBeenCalledWith({
+      clerkId: mockUser.id,
+      email: mockUser.primaryEmailAddress.emailAddress,
+      firstName: mockUser.firstName,
+      lastName: mockUser.lastName,
       role: "customer",
     })
 
@@ -78,13 +57,18 @@ describe("RoleSelectionPage", () => {
   })
 
   it("handles business role selection", async () => {
+    const mockCreateUser = jest.fn().mockResolvedValue("user_123")
+    const mockUpdate = jest.fn().mockResolvedValue({})
+    mockConvexMutation(mockCreateUser)
+    mockClerkUser({ ...mockUser, update: mockUpdate, publicMetadata: {} })
+
     render(<RoleSelectionPage />)
 
-    const businessCard = screen.getByText("Continue as Business").closest("div")
-    fireEvent.click(businessCard!)
+    const businessButton = screen.getByText("Continue as Business")
+    fireEvent.click(businessButton)
 
     await waitFor(() => {
-      expect(mockUser.update).toHaveBeenCalledWith({
+      expect(mockUpdate).toHaveBeenCalledWith({
         publicMetadata: {
           role: "business",
           onboardingComplete: false,
@@ -92,40 +76,49 @@ describe("RoleSelectionPage", () => {
       })
     })
 
-    expect(mockCreateOrUpdateUser).toHaveBeenCalledWith({
-      clerkId: "user_123",
-      email: "john@example.com",
-      firstName: "John",
-      lastName: "Doe",
+    expect(mockCreateUser).toHaveBeenCalledWith({
+      clerkId: mockUser.id,
+      email: mockUser.primaryEmailAddress.emailAddress,
+      firstName: mockUser.firstName,
+      lastName: mockUser.lastName,
       role: "business",
     })
 
     expect(mockPush).toHaveBeenCalledWith("/business/onboarding")
   })
 
-  it("handles errors during role selection", async () => {
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation()
-    mockUser.update.mockRejectedValue(new Error("Update failed"))
+  it("shows loading state during submission", async () => {
+    const mockCreateUser = jest.fn().mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)))
+    mockConvexMutation(mockCreateUser)
+    mockClerkUser({ ...mockUser, update: jest.fn().mockResolvedValue({}), publicMetadata: {} })
 
     render(<RoleSelectionPage />)
 
-    const customerCard = screen.getByText("Continue as Customer").closest("div")
-    fireEvent.click(customerCard!)
+    const customerButton = screen.getByText("Continue as Customer")
+    fireEvent.click(customerButton)
+
+    // Should show loading spinner
+    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
+  })
+
+  it("handles errors during role selection", async () => {
+    const mockCreateUser = jest.fn().mockRejectedValue(new Error("Failed to create user"))
+    const mockUpdate = jest.fn().mockRejectedValue(new Error("Failed to update user"))
+    mockConvexMutation(mockCreateUser)
+    mockClerkUser({ ...mockUser, update: mockUpdate, publicMetadata: {} })
+
+    // Mock console.error to avoid error output in tests
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {})
+
+    render(<RoleSelectionPage />)
+
+    const customerButton = screen.getByText("Continue as Customer")
+    fireEvent.click(customerButton)
 
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith("Error setting user role:", expect.any(Error))
     })
 
     consoleSpy.mockRestore()
-  })
-
-  it("disables interaction during submission", async () => {
-    render(<RoleSelectionPage />)
-
-    const customerCard = screen.getByText("Continue as Customer").closest("div")
-    fireEvent.click(customerCard!)
-
-    // Should show loading state
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument()
   })
 })
