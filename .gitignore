@@ -25,8 +25,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.early.coverage
-# Sentry Config File
-.env.sentry-build-plugin
-
-certificates

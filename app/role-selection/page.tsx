@@ -24,6 +24,14 @@ export default function RoleSelectionPage() {
 
     setIsSubmitting(true)
     try {
+      // Store role in Clerk metadata
+      await user.update({
+        publicMetadata: {
+          role: role,
+          onboardingComplete: false,
+        },
+      })
+
       // Store user data in Convex
       await createOrUpdateUser({
         clerkId: user.id,
@@ -35,9 +43,9 @@ export default function RoleSelectionPage() {
 
       // Redirect based on role
       if (role === "customer") {
-        router.push("/customer/dashboard")
+        router.push("/customer/onboarding")
       } else {
-        router.push("/business/dashboard")
+        router.push("/business/onboarding")
       }
     } catch (error) {
       console.error("Error setting user role:", error)
