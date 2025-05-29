@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { query } from "./_generated/server"
 import { internal } from "./_generated/api"
+import { verifyUserRole } from "./utils/auth"
 
 // Get dashboard overview data
 export const getDashboardOverview = query({
@@ -457,6 +458,106 @@ export const getCustomerDashboard = query({
         serviceBreakdown,
       },
       generatedAt: new Date().toISOString(),
+    }
+  },
+})
+
+// Get business dashboard stats
+export const getBusinessStats = query({
+  args: {
+    businessId: v.id("businessProfiles"),
+  },
+  handler: async (ctx, args) => {
+    // Verify user is authorized
+    const { user } = await verifyUserRole(ctx, ["business", "admin"])
+
+    // Get business profile
+    const businessProfile = await ctx.db.get(args.businessId)
+    if (!businessProfile) {
+      throw new Error("Business profile not found")
+    }
+
+    // Ensure user is authorized to view this business's stats
+    if (user.role !== "admin" && businessProfile.userId !== user.clerkId) {
+      throw new Error("Unauthorized: You can only view your own business stats")
+    }
+
+    // Get all appointments for this business
+    const appointments = await ctx.db
+      .query("appointments")
+      .withIndex("by_businessId", (q) => q.eq("businessId", args.businessId))
+      .collect()
+
+    // Calculate total revenue
+    const totalRevenue = appointments.reduce((sum, appointment) => sum + (appointment.price || 0), 0)
+
+    // Get unique customers
+    const customerIds = new Set(appointments.map((appointment) => appointment.customerId))
+
+    // Get upcoming appointments (future dates)
+    const now = new Date()
+    const upcomingAppointments = appointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date)
+      return appointmentDate >= now
+    })
+
+    return {
+      totalAppointments: appointments.length,
+      totalRevenue,
+      totalCustomers: customerIds.size,
+      upcomingAppointments: upcomingAppointments.length,
+    }
+  },
+})
+
+// Get customer dashboard stats
+export const getCustomerStats = query({
+  args: {
+    customerId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Verify user is authorized
+    const { user } = await verifyUserRole(ctx, ["customer", "admin"])
+
+    // Ensure user is authorized to view these stats
+    if (user.role !== "admin" && args.customerId !== user.clerkId) {
+      throw new Error("Unauthorized: You can only view your own stats")
+    }
+
+    // Get all appointments for this customer
+    const appointments = await ctx.db
+      .query("appointments")
+      .withIndex("by_customerId", (q) => q.eq("customerId", args.customerId))
+      .collect()
+
+    // Calculate total spent
+    const totalSpent = appointments.reduce((sum, appointment) => sum + (appointment.price || 0), 0)
+
+    // Get upcoming appointments (future dates)
+    const now = new Date()
+    const upcomingAppointments = appointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date)
+      return appointmentDate >= now
+    })
+
+    // Get completed appointments (past dates)
+    const completedAppointments = appointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date)
+      return appointmentDate < now
+    })
+
+    // Get vehicles
+    const vehicles = await ctx.db
+      .query("vehicles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.customerId))
+      .collect()
+
+    return {
+      totalAppointments: appointments.length,
+      totalSpent,
+      upcomingAppointments: upcomingAppointments.length,
+      completedAppointments: completedAppointments.length,
+      vehicleCount: vehicles.length,
     }
   },
 })
