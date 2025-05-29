@@ -6,160 +6,220 @@ import { verifyUserRole } from "./utils/auth"
 export const setBusinessAvailability = mutation({
   args: {
     businessId: v.id("businessProfiles"),
-    dayOfWeek: v.string(),
+    dayOfWeek: v.string(), // "monday", "tuesday", etc.
+    isOpen: v.boolean(),
+    openTime: v.optional(v.string()), // "09:00"
+    closeTime: v.optional(v.string()), // "17:00"
+  },
+  handler: async (ctx, args) => {
+    // Verify user is authorized
+    const { user } = await verifyUserRole(ctx, ["business", "admin"])
+
+    // Get business profile to verify ownership
+    const businessProfile = await ctx.db.get(args.businessId)
+    if (!businessProfile) {
+      throw new Error("Business profile not found")
+    }
+
+    // Ensure user owns this business (unless admin)
+    if (user.role !== "admin" && businessProfile.userId !== user.clerkId) {
+      throw new Error("Unauthorized: You can only manage your own business availability")
+    }
+
+    // Check if availability record exists
+    const existingAvailability = await ctx.db
+      .query("businessAvailability")
+      .withIndex("by_businessId_day", (q) => q.eq("businessId", args.businessId).eq("dayOfWeek", args.dayOfWeek))
+      .first()
+
+    const availabilityData = {
+      businessId: args.businessId,
+      dayOfWeek: args.dayOfWeek,
+      isOpen: args.isOpen,
+      openTime: args.openTime,
+      closeTime: args.closeTime,
+      updatedAt: new Date().toISOString(),
+    }
+
+    if (existingAvailability) {
+      await ctx.db.patch(existingAvailability._id, availabilityData)
+      return existingAvailability._id
+    } else {
+      const availabilityId = await ctx.db.insert("businessAvailability", {
+        ...availabilityData,
+        createdAt: new Date().toISOString(),
+      })
+      return availabilityId
+    }
+  },
+})
+
+// Get business availability
+export const getBusinessAvailability = query({
+  args: {
+    businessId: v.id("businessProfiles"),
+  },
+  handler: async (ctx, args) => {
+    const availability = await ctx.db
+      .query("businessAvailability")
+      .withIndex("by_businessId", (q) => q.eq("businessId", args.businessId))
+      .collect()
+
+    // Convert to object with day as key
+    const availabilityByDay = availability.reduce(
+      (acc, avail) => {
+        acc[avail.dayOfWeek] = {
+          isOpen: avail.isOpen,
+          openTime: avail.openTime,
+          closeTime: avail.closeTime,
+        }
+        return acc
+      },
+      {} as Record<string, { isOpen: boolean; openTime?: string; closeTime?: string }>,
+    )
+
+    return availabilityByDay
+  },
+})
+
+// Set special day availability (holidays, etc.)
+export const setSpecialDayAvailability = mutation({
+  args: {
+    businessId: v.id("businessProfiles"),
+    date: v.string(), // "2024-12-25"
     isOpen: v.boolean(),
     openTime: v.optional(v.string()),
     closeTime: v.optional(v.string()),
+    note: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Verify user is authorized
     const { user } = await verifyUserRole(ctx, ["business", "admin"])
 
-    // Get business profile
+    // Get business profile to verify ownership
     const businessProfile = await ctx.db.get(args.businessId)
     if (!businessProfile) {
       throw new Error("Business profile not found")
     }
 
-    // Verify ownership
+    // Ensure user owns this business (unless admin)
     if (user.role !== "admin" && businessProfile.userId !== user.clerkId) {
       throw new Error("Unauthorized: You can only manage your own business availability")
     }
 
-    // Update business hours
-    const currentHours = businessProfile.businessHours || {}
+    // Check if special day already exists
+    const existingSpecialDay = await ctx.db
+      .query("specialDayAvailability")
+      .withIndex("by_businessId_date", (q) => q.eq("businessId", args.businessId).eq("date", args.date))
+      .first()
 
-    if (args.isOpen) {
-      currentHours[args.dayOfWeek] = {
-        open: args.openTime || "09:00",
-        close: args.closeTime || "17:00",
-      }
-    } else {
-      currentHours[args.dayOfWeek] = null
+    const specialDayData = {
+      businessId: args.businessId,
+      date: args.date,
+      isOpen: args.isOpen,
+      openTime: args.openTime,
+      closeTime: args.closeTime,
+      note: args.note,
+      updatedAt: new Date().toISOString(),
     }
 
-    await ctx.db.patch(args.businessId, {
-      businessHours: currentHours,
-      updatedAt: new Date().toISOString(),
-    })
-
-    return { success: true }
+    if (existingSpecialDay) {
+      await ctx.db.patch(existingSpecialDay._id, specialDayData)
+      return existingSpecialDay._id
+    } else {
+      const specialDayId = await ctx.db.insert("specialDayAvailability", {
+        ...specialDayData,
+        createdAt: new Date().toISOString(),
+      })
+      return specialDayId
+    }
   },
 })
 
-// Get available time slots for booking
+// Get available time slots for a date
 export const getAvailableTimeSlots = query({
   args: {
     businessId: v.id("businessProfiles"),
+    serviceId: v.id("businessServices"),
     date: v.string(),
-    serviceDuration: v.number(), // in minutes
   },
   handler: async (ctx, args) => {
-    // Get business profile
-    const businessProfile = await ctx.db.get(args.businessId)
-    if (!businessProfile) {
-      throw new Error("Business profile not found")
-    }
-
-    // Get day of week
+    // Get business availability for the day
     const dayOfWeek = new Date(args.date).toLocaleDateString("en-US", { weekday: "lowercase" })
-    const businessHours = businessProfile.businessHours?.[dayOfWeek]
 
-    if (!businessHours) {
-      return [] // Business is closed this day
+    const availability = await ctx.db
+      .query("businessAvailability")
+      .withIndex("by_businessId_day", (q) => q.eq("businessId", args.businessId).eq("dayOfWeek", dayOfWeek))
+      .first()
+
+    // Check for special day availability
+    const specialDay = await ctx.db
+      .query("specialDayAvailability")
+      .withIndex("by_businessId_date", (q) => q.eq("businessId", args.businessId).eq("date", args.date))
+      .first()
+
+    // Determine if open and hours
+    let isOpen = availability?.isOpen ?? false
+    let openTime = availability?.openTime ?? "09:00"
+    let closeTime = availability?.closeTime ?? "17:00"
+
+    if (specialDay) {
+      isOpen = specialDay.isOpen
+      openTime = specialDay.openTime ?? openTime
+      closeTime = specialDay.closeTime ?? closeTime
     }
 
-    // Get existing appointments for this date
-    const appointments = await ctx.db
+    if (!isOpen) {
+      return []
+    }
+
+    // Get service duration
+    const service = await ctx.db.get(args.serviceId)
+    if (!service) {
+      throw new Error("Service not found")
+    }
+
+    // Get existing appointments for the date
+    const existingAppointments = await ctx.db
       .query("appointments")
-      .withIndex("by_date", (q) => q.eq("date", args.date))
-      .filter((q) => q.and(q.eq(q.field("businessId"), args.businessId), q.neq(q.field("status"), "cancelled")))
+      .withIndex("by_businessId_date", (q) => q.eq("businessId", args.businessId).eq("date", args.date))
+      .filter((q) => q.neq(q.field("status"), "cancelled"))
       .collect()
 
     // Generate time slots
-    const slots = []
-    const openTime = parseTime(businessHours.open)
-    const closeTime = parseTime(businessHours.close)
-    const slotDuration = args.serviceDuration
-    const interval = 30 // 30-minute intervals
+    const timeSlots = []
+    const serviceDuration = service.duration
+    const slotInterval = 30 // 30-minute intervals
 
     let currentTime = openTime
-    while (currentTime + slotDuration <= closeTime) {
-      const endTime = currentTime + slotDuration
+    while (currentTime < closeTime) {
+      const endTime = addMinutes(currentTime, serviceDuration)
 
-      // Check if slot conflicts with existing appointments
-      const hasConflict = appointments.some((appt) => {
-        const apptStart = parseTime(appt.startTime)
-        const apptEnd = parseTime(appt.endTime)
+      if (endTime <= closeTime) {
+        // Check if this slot conflicts with existing appointments
+        const hasConflict = existingAppointments.some((apt) => apt.startTime < endTime && apt.endTime > currentTime)
 
-        return (
-          (currentTime >= apptStart && currentTime < apptEnd) ||
-          (endTime > apptStart && endTime <= apptEnd) ||
-          (currentTime <= apptStart && endTime >= apptEnd)
-        )
-      })
-
-      if (!hasConflict) {
-        slots.push({
-          startTime: formatTime(currentTime),
-          endTime: formatTime(endTime),
-          available: true,
-        })
+        if (!hasConflict) {
+          timeSlots.push({
+            startTime: currentTime,
+            endTime,
+            available: true,
+          })
+        }
       }
 
-      currentTime += interval
+      currentTime = addMinutes(currentTime, slotInterval)
     }
 
-    return slots
+    return timeSlots
   },
 })
 
-// Helper functions
-function parseTime(timeStr: string): number {
-  const [hours, minutes] = timeStr.split(":").map(Number)
-  return hours * 60 + minutes
+// Helper function to add minutes to time string
+function addMinutes(timeStr: string, minutes: number): string {
+  const [hours, mins] = timeStr.split(":").map(Number)
+  const totalMinutes = hours * 60 + mins + minutes
+  const newHours = Math.floor(totalMinutes / 60)
+  const newMins = totalMinutes % 60
+  return `${String(newHours).padStart(2, "0")}:${String(newMins).padStart(2, "0")}`
 }
-
-function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`
-}
-
-// Block time slots for business
-export const blockTimeSlot = mutation({
-  args: {
-    businessId: v.id("businessProfiles"),
-    date: v.string(),
-    startTime: v.string(),
-    endTime: v.string(),
-    reason: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // Verify user is authorized
-    const { user } = await verifyUserRole(ctx, ["business", "admin"])
-
-    // Get business profile
-    const businessProfile = await ctx.db.get(args.businessId)
-    if (!businessProfile) {
-      throw new Error("Business profile not found")
-    }
-
-    // Verify ownership
-    if (user.role !== "admin" && businessProfile.userId !== user.clerkId) {
-      throw new Error("Unauthorized: You can only manage your own business availability")
-    }
-
-    // Create blocked time slot
-    await ctx.db.insert("blockedTimeSlots", {
-      businessId: args.businessId,
-      date: args.date,
-      startTime: args.startTime,
-      endTime: args.endTime,
-      reason: args.reason,
-      createdAt: new Date().toISOString(),
-    })
-
-    return { success: true }
-  },
-})
